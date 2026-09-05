@@ -46,7 +46,7 @@ foreach ($all_assessments as $a) {
     if (!$is_target) continue; // only show assessments that cover this module
 
     $scheduled = strtotime($a['scheduled_date']);
-    $grade_chk = $conn->prepare("SELECT g.score FROM grades g WHERE g.assessment_id = ? AND g.student_id = ?");
+    $grade_chk = $conn->prepare("SELECT g.total_score_awarded as score FROM grades g WHERE g.assessment_id = ? AND g.student_id = ?");
     $grade_chk->execute([$a['id'], $_SESSION['user_id']]);
     $grade_row = $grade_chk->fetch(PDO::FETCH_ASSOC);
 
