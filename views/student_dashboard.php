@@ -356,6 +356,37 @@ $total_upcoming  = count($upcoming);
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<?php 
+// Find the nearest upcoming assessment time in seconds from now
+$nearest_time = null;
+if (!empty($upcoming)) {
+    foreach ($upcoming as $a) {
+        $time_diff = strtotime($a['scheduled_date']) - time();
+        if ($time_diff > 0) {
+            if ($nearest_time === null || $time_diff < $nearest_time) {
+                $nearest_time = $time_diff;
+            }
+        }
+    }
+}
+?>
+
+<?php if ($nearest_time !== null): ?>
+<script>
+    // Auto-reload the page when the next assessment opens
+    // Add 2 seconds buffer to ensure server time has crossed the threshold
+    const timeToWaitMs = (<?= $nearest_time ?> + 2) * 1000;
+    
+    // Only set timer if it's within a reasonable window (e.g. 24 hours = 86400000ms)
+    if (timeToWaitMs > 0 && timeToWaitMs <= 86400000) {
+        setTimeout(function() {
+            window.location.reload();
+        }, timeToWaitMs);
+    }
+</script>
+<?php endif; ?>
+
 <script>
     // If there are active assessments, auto-open the assessments tab
     <?php if ($total_active > 0): ?>

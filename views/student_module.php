@@ -379,5 +379,32 @@ $pdf_url = BASE_URL . '/uploads/pdfs/' . $module['pdf_path'];
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<?php 
+// Find the nearest upcoming assessment time in seconds from now
+$nearest_time = null;
+if (!empty($upcoming_assessments)) {
+    foreach ($upcoming_assessments as $a) {
+        $time_diff = strtotime($a['scheduled_date']) - time();
+        if ($time_diff > 0) {
+            if ($nearest_time === null || $time_diff < $nearest_time) {
+                $nearest_time = $time_diff;
+            }
+        }
+    }
+}
+?>
+
+<?php if ($nearest_time !== null): ?>
+<script>
+    // Auto-reload the page when the next assessment opens
+    const timeToWaitMs = (<?= $nearest_time ?> + 2) * 1000;
+    if (timeToWaitMs > 0 && timeToWaitMs <= 86400000) {
+        setTimeout(function() {
+            window.location.reload();
+        }, timeToWaitMs);
+    }
+</script>
+<?php endif; ?>
 </body>
 </html>

@@ -15,6 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['role'] = $user['role'];
         $_SESSION['name'] = $user['name'];
 
+        // Log the login
+        $logStmt = $conn->prepare("INSERT INTO login_logs (user_id) VALUES (?)");
+        $logStmt->execute([$user['id']]);
+
         if ($user['role'] === 'admin') {
             header('Location: ' . BASE_URL . '/admin');
         } elseif ($user['role'] === 'facilitator') {

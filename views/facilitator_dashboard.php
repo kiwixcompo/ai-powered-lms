@@ -201,42 +201,69 @@ try {
 
                         // --- TAB 2: ENROLLED STUDENTS ---
                         echo '<div class="tab-pane fade" id="students-pane-'.$c['id'].'" role="tabpanel">';
-                        $en_stmt = $conn->prepare("SELECT u.id, u.name, u.reg_no FROM users u JOIN enrollments e ON u.id = e.student_id WHERE e.course_id = ? ORDER BY u.name");
+                        $en_stmt = $conn->prepare("
+                            SELECT u.id, u.name, u.reg_no, COUNT(l.id) as login_count, MAX(l.login_time) as last_login 
+                            FROM users u 
+                            JOIN enrollments e ON u.id = e.student_id 
+                            LEFT JOIN login_logs l ON u.id = l.user_id 
+                            WHERE e.course_id = ? 
+                            GROUP BY u.id 
+                            ORDER BY u.name
+                        ");
                         $en_stmt->execute([$c['id']]);
                         $students = $en_stmt->fetchAll(PDO::FETCH_ASSOC);
                         
                         if (count($students) > 0) {
+                            $chartData = [];
+                            foreach ($students as $s) {
+                                $chartData[] = [
+                                    'label' => $s['name'] . ' (' . $s['reg_no'] . ')',
+                                    'logins' => (int)$s['login_count']
+                                ];
+                            }
+                            $chartJson = htmlspecialchars(json_encode($chartData), ENT_QUOTES, 'UTF-8');
+
                             echo '
-                            <div class="mb-3 d-flex justify-content-between align-items-center">
-                                <input type="text" class="form-control form-control-sm w-50" placeholder="Search students..." onkeyup="searchStudents('.$c['id'].', this.value)">
-                                <form action="' . BASE_URL . '/src/unenroll.php" method="POST" onsubmit="return confirm(\'Unenroll ALL students?\');">
-                                    <input type="hidden" name="action" value="unenroll_all">
-                                    <input type="hidden" name="course_id" value="'.$c['id'].'">
-                                    <button type="submit" class="btn btn-sm btn-danger">Unenroll All ('.count($students).')</button>
-                                </form>
+                            <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <input type="text" class="form-control form-control-sm w-auto" placeholder="Search students..." onkeyup="searchStudents('.$c['id'].', this.value)">
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-info text-white me-2" onclick="showLoginGraph(\''.$c['id'].'\', \''.htmlspecialchars(addslashes($c['code'])).'\', \''.$chartJson.'\')">
+                                        View Login Graph
+                                    </button>
+                                    <form action="' . BASE_URL . '/src/unenroll.php" method="POST" class="d-inline" onsubmit="return confirm(\'Unenroll ALL students?\');">
+                                        <input type="hidden" name="action" value="unenroll_all">
+                                        <input type="hidden" name="course_id" value="'.$c['id'].'">
+                                        <button type="submit" class="btn btn-sm btn-danger">Unenroll All ('.count($students).')</button>
+                                    </form>
+                                </div>
                             </div>
                             <form action="' . BASE_URL . '/src/unenroll.php" method="POST">
                                 <input type="hidden" name="action" value="unenroll_selected">
                                 <input type="hidden" name="course_id" value="'.$c['id'].'">
                                 <div class="table-responsive border" style="max-height: 400px; overflow-y: auto;">
-                                    <div class="table-responsive"><table class="table table-sm table-hover mb-0" id="studentTable_'.$c['id'].'">
+                                    <table class="table table-sm table-hover mb-0" id="studentTable_'.$c['id'].'">
                                         <thead class="table-light position-sticky top-0" style="z-index: 1;">
                                             <tr>
                                                 <th style="width: 50px;"><input type="checkbox" onclick="toggleAllStudents('.$c['id'].', this.checked)"></th>
                                                 <th>Name</th>
                                                 <th>Registration No</th>
+                                                <th>Total Logins</th>
+                                                <th>Last Login</th>
                                             </tr>
                                         </thead>
                                         <tbody>';
                             foreach ($students as $s) {
+                                $lastLogin = $s['last_login'] ? date('M j, Y, g:i a', strtotime($s['last_login'])) : 'Never';
                                 echo '<tr>
                                         <td><input type="checkbox" name="student_ids[]" value="'.$s['id'].'" class="student-chk-'.$c['id'].'"></td>
                                         <td class="student-name">'.htmlspecialchars($s['name']).'</td>
                                         <td class="student-reg">'.htmlspecialchars($s['reg_no']).'</td>
+                                        <td>'.(int)$s['login_count'].'</td>
+                                        <td>'.$lastLogin.'</td>
                                       </tr>';
                             }
                             echo '      </tbody>
-                                    </table></div>
+                                    </table>
                                 </div>
                                 <button type="submit" class="btn btn-sm btn-outline-danger mt-3" onclick="return confirm(\'Unenroll selected students?\');">Unenroll Selected</button>
                             </form>';
@@ -415,10 +442,65 @@ try {
         </div>
     </div>
 
+    <!-- Login Graph Modal -->
+    <div class="modal fade" id="loginGraphModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginGraphTitle">Login Statistics</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <canvas id="loginChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Switched to Pollinations AI, no external JS required -->
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        let loginChartInstance = null;
+
+        function showLoginGraph(courseId, courseCode, dataJson) {
+            const data = JSON.parse(dataJson);
+            const labels = data.map(d => d.label);
+            const counts = data.map(d => d.logins);
+
+            document.getElementById('loginGraphTitle').innerText = courseCode + " - Student Login Stats";
+            
+            const ctx = document.getElementById('loginChart').getContext('2d');
+            if (loginChartInstance) {
+                loginChartInstance.destroy();
+            }
+
+            loginChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Logins',
+                        data: counts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+
+            new bootstrap.Modal(document.getElementById('loginGraphModal')).show();
+        }
+
         // Live remaining marks updater for CA mark allocator
         document.querySelectorAll('input[id^="totalScore_"]').forEach(function(input) {
             input.addEventListener('input', function() {

@@ -276,6 +276,31 @@
                         </div>
                     </div>
                 </div>
+            <!-- Category 5: System Login Analytics -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingAnalytics">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnalytics" aria-expanded="false" aria-controls="collapseAnalytics">
+                        System Login Analytics
+                    </button>
+                </h2>
+                <div id="collapseAnalytics" class="accordion-collapse collapse" aria-labelledby="headingAnalytics" data-bs-parent="#adminAccordion">
+                    <div class="accordion-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Select Scope</label>
+                                <select id="analyticsCourseSelect" class="form-select" onchange="loadAdminAnalytics()">
+                                    <option value="all">General (Top 50 Active Students)</option>
+                                    <?php foreach ($courses as $c): ?>
+                                        <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['code'] . ' - ' . $c['title']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="chart-container" style="position: relative; height:400px; width:100%">
+                            <canvas id="adminLoginChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div> <!-- End Accordion -->
@@ -322,5 +347,56 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let adminChartInstance = null;
+
+        async function loadAdminAnalytics() {
+            const courseId = document.getElementById('analyticsCourseSelect').value;
+            try {
+                const response = await fetch(`<?php echo BASE_URL; ?>/src/get_login_stats.php?course_id=${courseId}`);
+                const data = await response.json();
+                
+                const labels = data.map(d => d.label);
+                const counts = data.map(d => d.logins);
+
+                const ctx = document.getElementById('adminLoginChart').getContext('2d');
+                if (adminChartInstance) {
+                    adminChartInstance.destroy();
+                }
+
+                adminChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Logins',
+                            data: counts,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { precision: 0 }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Failed to load analytics", err);
+            }
+        }
+
+        // Load initially if accordion is opened
+        document.getElementById('collapseAnalytics').addEventListener('shown.bs.collapse', function () {
+            if (!adminChartInstance) loadAdminAnalytics();
+        });
+    </script>
 </body>
 </html>
