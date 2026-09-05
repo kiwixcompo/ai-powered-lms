@@ -46,9 +46,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $stmt = $conn->prepare("INSERT INTO assessments (course_id, title, target_modules, timer_minutes, total_score, scheduled_date, num_questions, question_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$course_id, $title, $target_modules, $timer, $total_score, $scheduled_date, $num_questions, $question_type]);
+        $assessment_id = $conn->lastInsertId();
+
+        // Process AI generated questions if provided
+        $ai_questions_json = $_POST['ai_questions'] ?? '';
+        if (!empty($ai_questions_json)) {
+            $questions = json_decode($ai_questions_json, true);
+            if (is_array($questions) && count($questions) > 0) {
+                // Determine max score per question based on total marks
+                $per_question_score = round($total_score / count($questions), 2);
+                
+                $q_stmt = $conn->prepare("INSERT INTO questions (assessment_id, student_id, question_text, question_type, options, correct_answer, max_score) VALUES (?, NULL, ?, ?, ?, ?, ?)");
+                
+                foreach ($questions as $q) {
+                    $q_text = $q['question_text'] ?? 'Question';
+                    $q_type = $q['question_type'] ?? 'mcq';
+                    $opts   = (isset($q['options']) && is_array($q['options'])) ? json_encode($q['options']) : null;
+                    $ans    = $q['correct_answer'] ?? '';
+                    
+                    $q_stmt->execute([
+                        $assessment_id,
+                        $q_text,
+                        $q_type,
+                        $opts,
+                        $ans,
+                        $per_question_score
+                    ]);
+                }
+            }
+        }
 
         $conn->commit();
-        $_SESSION['msg'] = "Assessment '{$title}' saved! Marks allocated: {$total_score}/{$ca_max}.";
+        $_SESSION['msg'] = "Assessment '{$title}' generated and saved! Marks allocated: {$total_score}/{$ca_max}.";
     } catch (PDOException $e) {
         $conn->rollBack();
         $_SESSION['error'] = "Error saving assessment: " . $e->getMessage();

@@ -309,16 +309,24 @@
                                     </div>
 
                                     <div class="row mb-3">
-                                        <div class="col-md-3">
-                                            <label class="form-label small fw-bold">Number of Questions</label>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">No. Questions</label>
                                             <input type="number" name="num_questions" id="numQuestions_'.$c['id'].'" class="form-control form-control-sm" value="5">
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label class="form-label small fw-bold">Question Type</label>
                                             <select name="question_type" id="questionType_'.$c['id'].'" class="form-select form-select-sm">
                                                 <option value="mixed">Mixed</option>
                                                 <option value="mcq">Multiple Choice</option>
                                                 <option value="subjective">Subjective / Theory</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">Difficulty</label>
+                                            <select name="difficulty" id="difficulty_'.$c['id'].'" class="form-select form-select-sm">
+                                                <option value="Easy">Easy</option>
+                                                <option value="Medium" selected>Medium</option>
+                                                <option value="Hard">Hard</option>
                                             </select>
                                         </div>
                                         <div class="col-md-3">
@@ -359,8 +367,13 @@
                                         <label class="form-label small fw-bold">Scheduled Date & Time (Start Time)</label>
                                         <input type="datetime-local" name="scheduled_date" class="form-control form-control-sm" required>
                                     </div>
+                                    
+                                    <input type="hidden" name="ai_questions" id="aiQuestions_'.$c['id'].'" value="">
 
-                                    <button type="submit" class="btn btn-dark btn-sm w-100">Save Assessment to Course</button>
+                                    <button type="button" class="btn btn-dark btn-sm w-100" onclick="generateAndSaveAssessment('.$c['id'].')">
+                                        <span id="assmtBtnText_'.$c['id'].'">Generate Questions via AI & Save Assessment</span>
+                                        <div class="spinner-border spinner-border-sm ms-2 d-none" id="assmtSpinner_'.$c['id'].'" role="status"></div>
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -445,6 +458,99 @@
                 document.getElementById('aiGenForm_' + courseId).submit();
             }
         }
+
+        async function generateAndSaveAssessment(courseId) {
+            const form = document.getElementById('saveAssmtForm_' + courseId);
+            
+            // Basic HTML5 validation
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const btnText = document.getElementById('assmtBtnText_' + courseId);
+            const spinner = document.getElementById('assmtSpinner_' + courseId);
+            const hiddenInput = document.getElementById('aiQuestions_' + courseId);
+            
+            const numQ = document.getElementById('numQuestions_' + courseId).value;
+            const qType = document.getElementById('questionType_' + courseId).value;
+            const diff = document.getElementById('difficulty_' + courseId).value;
+
+            // Gather selected modules
+            const modChks = document.querySelectorAll('.mod-chk-' + courseId + ':checked');
+            let targetMods = 'ALL';
+            if (!document.getElementById('modAll_' + courseId).checked && modChks.length > 0) {
+                targetMods = Array.from(modChks).map(c => c.value);
+            }
+
+            btnText.innerText = 'Extracting Text & Generating...';
+            spinner.classList.remove('d-none');
+            const submitBtn = spinner.closest('button');
+            submitBtn.disabled = true;
+
+            try {
+                // 1. Fetch module text
+                let formData = new FormData();
+                formData.append('course_id', courseId);
+                formData.append('target_modules', targetMods === 'ALL' ? 'ALL' : JSON.stringify(targetMods));
+                
+                let res = await fetch(BASE_URL + '/src/get_module_content.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!res.ok) throw new Error("Failed to extract course text.");
+                let data = await res.json();
+                let courseText = data.content;
+
+                // 2. Formulate AI Prompt
+                let prompt = `You are an expert Professor creating an assessment for a university course.
+Create ${numQ} questions of type '${qType}' (where mixed means some MCQ, some Subjective/Theory).
+The difficulty level should be ${diff}.
+
+CRITICAL INSTRUCTIONS:
+- The questions MUST make sense and test deep conceptual understanding.
+- DO NOT use generic or lazy phrases like "Which of the following statements is true regarding this module?".
+- Questions must be clearly understandable on their own.
+- For MCQ, provide exactly 4 options.
+- The output MUST be a valid JSON array of objects.
+- Each object must match this schema:
+{
+    "question_text": "Clear, contextual question here",
+    "question_type": "mcq" OR "theory",
+    "options": ["opt1", "opt2", "opt3", "opt4"], // Only for mcq, else null
+    "correct_answer": "The correct option exactly as written OR the model answer for theory"
+}
+
+Here is the extracted course material to base your questions on:
+${courseText}
+
+OUTPUT STRICTLY JSON ONLY. No markdown blocks, no other text.`;
+
+                // 3. Call Puter AI
+                btnText.innerText = 'AI Thinking...';
+                let responseText = await puter.ai.chat(prompt);
+
+                // Clean up JSON block if AI wraps it in markdown
+                responseText = responseText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+                
+                // Parse to ensure it's valid JSON
+                let questionsData = JSON.parse(responseText);
+                if (!Array.isArray(questionsData)) throw new Error("AI did not return an array.");
+
+                // 4. Save to hidden field and submit
+                hiddenInput.value = JSON.stringify(questionsData);
+                form.submit();
+
+            } catch (error) {
+                console.error("AI Generation Error: ", error);
+                alert("Failed to generate AI questions: " + error.message + "\nPlease try again or select fewer modules.");
+                btnText.innerText = 'Generate Questions via AI & Save Assessment';
+                spinner.classList.add('d-none');
+                submitBtn.disabled = false;
+            }
+        }
+
+        const BASE_URL = '<?php echo BASE_URL; ?>';
 
         function toggleAllStudents(courseId, isChecked) {
             const checkboxes = document.querySelectorAll('.student-chk-' + courseId);

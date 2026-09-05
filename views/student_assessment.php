@@ -34,122 +34,15 @@ if ($check->rowCount() > 0) {
     die("You have already completed this assessment.");
 }
 
-// Fetch Questions for this specific student
-$q_stmt = $conn->prepare("SELECT id, question_text, question_type, options FROM questions WHERE assessment_id = ? AND student_id = ?");
+// Fetch Questions
+// If this is a modern assessment, questions are generated globally (student_id IS NULL)
+// If it's a legacy assessment, they might be generated per student
+$q_stmt = $conn->prepare("SELECT id, question_text, question_type, options FROM questions WHERE assessment_id = ? AND (student_id = ? OR student_id IS NULL)");
 $q_stmt->execute([$assessment_id, $_SESSION['user_id']]);
 $questions = $q_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// If no questions exist for this student, generate them uniquely on the fly
 if (empty($questions)) {
-    // 1. Fetch module contents
-    $course_id = $assessment['course_id'];
-    $target_modules = $assessment['target_modules'];
-    
-    $query = "SELECT title, content, is_pdf_mode, pdf_path FROM modules WHERE course_id = ?";
-    $params = [$course_id];
-    
-    if ($target_modules !== 'ALL') {
-        $ids = json_decode($target_modules, true);
-        if (is_array($ids) && count($ids) > 0) {
-            $in = str_repeat('?,', count($ids) - 1) . '?';
-            $query .= " AND id IN ($in)";
-            $params = array_merge($params, $ids);
-        }
-    }
-    
-    $stmt = $conn->prepare($query);
-    $stmt->execute($params);
-    $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    $combined_content = "Default course material fallback.";
-    if (count($modules) > 0) {
-        $combined_content = "";
-        require_once __DIR__ . '/../vendor/autoload.php';
-        $parser = new \Smalot\PdfParser\Parser();
-        foreach ($modules as $m) {
-            if ($m['is_pdf_mode'] && !empty($m['pdf_path'])) {
-                $pdf_full_path = 'uploads/pdfs/' . $m['pdf_path'];
-                if (file_exists($pdf_full_path)) {
-                    try {
-                        $pdf = $parser->parseFile($pdf_full_path);
-                        $combined_content .= $pdf->getText() . " ";
-                    } catch (Exception $e) {}
-                }
-            } else {
-                $combined_content .= $m['content'] . " ";
-            }
-        }
-    }
-    
-    // 2. Extract sentences
-    $combined_content = preg_replace("/\r|\n/", " ", $combined_content);
-    $sentences_raw = preg_split('/(?<=[.?!])\s+/', $combined_content, -1, PREG_SPLIT_NO_EMPTY);
-    $sentences = [];
-    foreach ($sentences_raw as $s) {
-        $s = trim($s);
-        if (strlen($s) > 20 && strpos($s, '#') === false && strpos($s, '*') === false) {
-            $sentences[] = $s;
-        }
-    }
-    if (count($sentences) < 10) {
-        $sentences = array_fill(0, 10, "What is the primary function of this module component?");
-    }
-    
-    // 3. Generate Unique Questions
-    $num_questions = $assessment['num_questions'] ?? 5;
-    $q_type_pref = $assessment['question_type'] ?? 'mcq';
-    $per_question_score = round($assessment['total_score'] / max(1, $num_questions), 2);
-    
-    $insert_q = $conn->prepare("INSERT INTO questions (assessment_id, student_id, question_text, question_type, options, correct_answer, max_score) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    
-    shuffle($sentences);
-    
-    for ($i = 0; $i < $num_questions; $i++) {
-        $correct_ans = $sentences[$i % count($sentences)];
-        
-        $q_type = $q_type_pref;
-        if ($q_type === 'mixed') {
-            $q_type = (rand(0,1) == 0) ? 'mcq' : 'subjective';
-        }
-        
-        if ($q_type === 'subjective') {
-            // Re-map subjective to theory to match schema ENUM
-            $q_type = 'theory';
-            $insert_q->execute([
-                $assessment_id,
-                $_SESSION['user_id'],
-                "Explain the following concept: " . $correct_ans,
-                $q_type,
-                null,
-                $correct_ans,
-                $per_question_score
-            ]);
-        } else {
-            // MCQ
-            $q_type = 'mcq';
-            $opts = [$correct_ans];
-            while (count($opts) < 4) {
-                $rand = $sentences[array_rand($sentences)];
-                if (!in_array($rand, $opts)) {
-                    $opts[] = $rand;
-                }
-            }
-            shuffle($opts);
-            $insert_q->execute([
-                $assessment_id,
-                $_SESSION['user_id'],
-                "Which of the following statements is true regarding this module?",
-                $q_type,
-                json_encode($opts),
-                $correct_ans,
-                $per_question_score
-            ]);
-        }
-    }
-    
-    // 4. Re-fetch the generated questions
-    $q_stmt->execute([$assessment_id, $_SESSION['user_id']]);
-    $questions = $q_stmt->fetchAll(PDO::FETCH_ASSOC);
+    die("No questions found for this assessment. Please contact your facilitator.");
 }
 ?>
 <!DOCTYPE html>
