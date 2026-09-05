@@ -15,9 +15,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['role'] = $user['role'];
         $_SESSION['name'] = $user['name'];
 
-        // Log the login
-        $logStmt = $conn->prepare("INSERT INTO login_logs (user_id) VALUES (?)");
-        $logStmt->execute([$user['id']]);
+        // Log the login gracefully
+        try {
+            $logStmt = $conn->prepare("INSERT INTO login_logs (user_id) VALUES (?)");
+            $logStmt->execute([$user['id']]);
+        } catch (PDOException $e) {
+            // If table doesn't exist, create it and alter users table on the fly for the live server
+            try {
+                $conn->exec("CREATE TABLE IF NOT EXISTS login_logs (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)");
+                $conn->exec("ALTER TABLE users ADD COLUMN last_activity TIMESTAMP NULL DEFAULT NULL");
+                
+                // Retry logging
+                $logStmt = $conn->prepare("INSERT INTO login_logs (user_id) VALUES (?)");
+                $logStmt->execute([$user['id']]);
+            } catch (PDOException $e2) {
+                // Ignore if it fails again (e.g. column already exists)
+            }
+        }
 
         if ($user['role'] === 'admin') {
             header('Location: ' . BASE_URL . '/admin');

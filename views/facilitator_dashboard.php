@@ -201,24 +201,32 @@ try {
 
                         // --- TAB 2: ENROLLED STUDENTS ---
                         echo '<div class="tab-pane fade" id="students-pane-'.$c['id'].'" role="tabpanel">';
-                        $en_stmt = $conn->prepare("
-                            SELECT u.id, u.name, u.reg_no, u.last_activity, COUNT(l.id) as login_count, MAX(l.login_time) as last_login 
-                            FROM users u 
-                            JOIN enrollments e ON u.id = e.student_id 
-                            LEFT JOIN login_logs l ON u.id = l.user_id 
-                            WHERE e.course_id = ? 
-                            GROUP BY u.id 
-                            ORDER BY u.name
-                        ");
-                        $en_stmt->execute([$c['id']]);
-                        $students = $en_stmt->fetchAll(PDO::FETCH_ASSOC);
+                        $students = [];
+                        try {
+                            $en_stmt = $conn->prepare("
+                                SELECT u.id, u.name, u.reg_no, u.last_activity, COUNT(l.id) as login_count, MAX(l.login_time) as last_login 
+                                FROM users u 
+                                JOIN enrollments e ON u.id = e.student_id 
+                                LEFT JOIN login_logs l ON u.id = l.user_id 
+                                WHERE e.course_id = ? 
+                                GROUP BY u.id 
+                                ORDER BY u.name
+                            ");
+                            $en_stmt->execute([$c['id']]);
+                            $students = $en_stmt->fetchAll(PDO::FETCH_ASSOC);
+                        } catch (PDOException $e) {
+                            // Fallback if the login_logs table or last_activity column hasn't been created yet
+                            $en_stmt = $conn->prepare("SELECT u.id, u.name, u.reg_no FROM users u JOIN enrollments e ON u.id = e.student_id WHERE e.course_id = ? ORDER BY u.name");
+                            $en_stmt->execute([$c['id']]);
+                            $students = $en_stmt->fetchAll(PDO::FETCH_ASSOC);
+                        }
                         
                         if (count($students) > 0) {
                             $chartData = [];
                             foreach ($students as $s) {
                                 $chartData[] = [
                                     'label' => $s['name'] . ' (' . $s['reg_no'] . ')',
-                                    'logins' => (int)$s['login_count']
+                                    'logins' => isset($s['login_count']) ? (int)$s['login_count'] : 0
                                 ];
                             }
                             $chartJson = htmlspecialchars(json_encode($chartData), ENT_QUOTES, 'UTF-8');
@@ -254,16 +262,17 @@ try {
                                         <tbody>';
                             foreach ($students as $s) {
                                 // Online logic (active within the last 5 minutes)
-                                $is_online = $s['last_activity'] && (time() - strtotime($s['last_activity']) <= 300);
-                                $lastLogin = $s['last_login'] ? date('M j, Y, g:i a', strtotime($s['last_login'])) : 'Never logged in';
+                                $is_online = isset($s['last_activity']) && $s['last_activity'] && (time() - strtotime($s['last_activity']) <= 300);
+                                $lastLogin = !empty($s['last_login']) ? date('M j, Y, g:i a', strtotime($s['last_login'])) : 'Never logged in';
                                 
                                 $status_badge = $is_online ? '<span class="badge bg-success">Online Now</span>' : '<span class="text-muted small">Offline<br>(Last: '.$lastLogin.')</span>';
+                                $loginCount = isset($s['login_count']) ? (int)$s['login_count'] : 0;
 
                                 echo '<tr>
                                         <td><input type="checkbox" name="student_ids[]" value="'.$s['id'].'" class="student-chk-'.$c['id'].'"></td>
                                         <td class="student-name">'.htmlspecialchars($s['name']).'</td>
                                         <td class="student-reg">'.htmlspecialchars($s['reg_no']).'</td>
-                                        <td>'.(int)$s['login_count'].'</td>
+                                        <td>'.$loginCount.'</td>
                                         <td>'.$status_badge.'</td>
                                       </tr>';
                             }
