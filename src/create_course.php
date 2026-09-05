@@ -1,5 +1,4 @@
 <?php
-session_start();
 // Force PHP to log errors to a specific file
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/error_log');

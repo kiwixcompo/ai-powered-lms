@@ -21,8 +21,7 @@
             
             <div class="p-4">
                 <?php 
-                    if (session_status() === PHP_SESSION_NONE) session_start();
-                    if (isset($_SESSION['error'])) {
+                    if (session_status() === PHP_SESSION_NONE)                     if (isset($_SESSION['error'])) {
                         echo '<div class="alert alert-danger shadow-sm">'.htmlspecialchars($_SESSION['error']).'</div>';
                         unset($_SESSION['error']);
                     }

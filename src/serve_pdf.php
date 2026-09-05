@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once '../config/config.php';
 
 // Session auth removed because pdf.js fetch does not send cookies by default

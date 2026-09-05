@@ -4,6 +4,17 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', dirname(__DIR__) . '/error_log');
 
+// Fix Session handling on strict cPanel environments
+$session_path = dirname(__DIR__) . '/sessions';
+if (!file_exists($session_path)) {
+    @mkdir($session_path, 0777, true);
+}
+session_save_path($session_path);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 date_default_timezone_set('Africa/Lagos');
 $is_localhost = ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1');
 define('BASE_URL', $is_localhost ? '/CMP_Course_Module' : '');
