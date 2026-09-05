@@ -448,14 +448,14 @@ try {
         async function generateAICourse(courseId) {
             const outline = document.getElementById('outline_' + courseId).value;
             const gradeLvl = document.getElementById('gradeLvl_' + courseId).value;
-            
-            if (!outline) {
-                alert("Please provide an outline.");
-                return;
-            }
-
             const btnText = document.getElementById('aiBtnText_' + courseId);
             const spinner = document.getElementById('aiSpinner_' + courseId);
+            
+            if (!outline) {
+                btnText.innerHTML = '<span class="text-danger">Please provide an outline.</span>';
+                setTimeout(() => btnText.innerText = 'Generate Course Content via AI', 3000);
+                return;
+            }
             
             btnText.innerText = 'Generating...';
             spinner.classList.remove('d-none');
@@ -602,10 +602,12 @@ OUTPUT STRICTLY JSON ONLY. No markdown blocks, no other text.`;
 
             } catch (error) {
                 console.error("AI Generation Error: ", error);
-                alert("Failed to generate AI questions: " + error.message + "\nPlease try again or select fewer modules.");
-                btnText.innerText = 'Generate Questions via AI & Save Assessment';
+                btnText.innerHTML = '<span class="text-danger">Error: ' + error.message + '</span>';
                 spinner.classList.add('d-none');
                 submitBtn.disabled = false;
+                setTimeout(() => {
+                    btnText.innerText = 'Generate Questions via AI & Save Assessment';
+                }, 4000);
             }
         }
 
