@@ -35,7 +35,7 @@ if (!$data) die("No responses found to grade.");
         <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
         <h4>AI is evaluating your assessment...</h4>
         <p class="text-muted">Please do not close this window.</p>
-        <form id="saveGradesForm" action="/src/save_grades.php" method="POST" class="d-none">
+        <form id="saveGradesForm" action="<?php echo BASE_URL; ?>/src/save_grades.php" method="POST" class="d-none">
             <input type="hidden" name="assessment_id" value="<?= $assessment_id ?>">
             <input type="hidden" name="grades_json" id="gradesJson">
         </form>

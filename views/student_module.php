@@ -68,12 +68,12 @@ $html_content = $parsedown->text($module['content'] ?? 'No content generated yet
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand" href="/student">Student Portal</a>
+    <a class="navbar-brand" href="<?php echo BASE_URL; ?>/student">Student Portal</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto"><li class="nav-item"><a class="nav-link" href="/student">Back to Dashboard</a></li></ul></div>
+          <ul class="navbar-nav ms-auto"><li class="nav-item"><a class="nav-link" href="<?php echo BASE_URL; ?>/student">Back to Dashboard</a></li></ul></div>
   </div>
 </nav>
 
@@ -90,7 +90,7 @@ $html_content = $parsedown->text($module['content'] ?? 'No content generated yet
                 echo '<h4>Content Hidden</h4>';
                 echo '<p>An exam ('.htmlspecialchars($blocking_assessment['title']).') covering this module is currently active.</p>';
                 echo '<p>The course content is hidden to prevent cheating while the assessment is open.</p>';
-                echo '<a href="/student/assessment?id='.$blocking_assessment['id'].'" class="btn btn-warning mt-3 fw-bold">Go Take Assessment</a>';
+                echo '<a href="' . BASE_URL . '/student/assessment?id='.$blocking_assessment['id'].'" class="btn btn-warning mt-3 fw-bold">Go Take Assessment</a>';
                 echo '</div>';
             } else {
                 if ($module['is_pdf_mode'] && !empty($module['pdf_path'])) {

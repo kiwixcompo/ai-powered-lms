@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt = $conn->prepare("UPDATE modules SET content = ? WHERE id = ?");
             $stmt->execute([$content, $module_id]);
             // Redirect back with success message
-            header('Location: /CMP_Course_Module/facilitator/module?id=' . $module_id);
+            header('Location: ' . BASE_URL . '/facilitator/module?id=' . $module_id);
             exit;
         } catch (PDOException $e) {
             die('Error saving content: ' . $e->getMessage());

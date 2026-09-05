@@ -51,5 +51,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['markdown_content'])) {
     }
 }
 
-header('Location: /CMP_Course_Module/facilitator');
+header('Location: ' . BASE_URL . '/facilitator');
 exit;

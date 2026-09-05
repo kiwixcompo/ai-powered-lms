@@ -7,22 +7,22 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom TSU Theme -->
-    <link href="/assets/css/style.css" rel="stylesheet">
-    <link rel="icon" href="/assets/images/logo.png" type="image/png">
+    <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
+    <link rel="icon" href="<?php echo BASE_URL; ?>/assets/images/logo.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
     
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark tsu-navbar mb-4">
       <div class="container">
-        <a class="navbar-brand" href="#"><img src="/assets/images/logo.png" alt="TSU"> Facilitator Portal</a>
+        <a class="navbar-brand" href="#"><img src="<?php echo BASE_URL; ?>/assets/images/logo.png" alt="TSU"> Facilitator Portal</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a class="nav-link text-white">Welcome, <?= htmlspecialchars($_SESSION['name']) ?></a></li>
-            <li class="nav-item"><a class="nav-link" href="/src/logout.php">Logout</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo BASE_URL; ?>/src/logout.php">Logout</a></li>
           </ul>
         </div>
       </div>
@@ -76,7 +76,7 @@
                             <div class="col-md-4 border-end">
                                 <h6>Option 1: Upload Markdown</h6>
                                 <p class="small text-muted mb-2">Upload a single Markdown file (.md).</p>
-                                <form action="/src/process_markdown.php" method="POST" enctype="multipart/form-data">
+                                <form action="<?php echo BASE_URL; ?>/src/process_markdown.php" method="POST" enctype="multipart/form-data">
                                     <input type="hidden" name="course_id" value="'.$c['id'].'">
                                     <div class="mb-2">
                                         <input type="file" class="form-control form-control-sm" name="markdown_file" accept=".md, .txt" required>
@@ -87,7 +87,7 @@
                             <div class="col-md-4 border-end">
                                 <h6>Option 2: Generate via AI</h6>
                                 <p class="small text-muted mb-2">Provide an outline for AI generation.</p>
-                                <form id="aiGenForm_'.$c['id'].'" action="/src/process_markdown_raw.php" method="POST">
+                                <form id="aiGenForm_'.$c['id'].'" action="' . BASE_URL . '/src/process_markdown_raw.php" method="POST">
                                     <input type="hidden" name="course_id" value="'.$c['id'].'">
                                     <input type="hidden" name="markdown_content" id="mdContent_'.$c['id'].'">
                                     <div class="mb-2">
@@ -110,7 +110,7 @@
                             <div class="col-md-4">
                                 <h6>Option 3: Upload PDF(s)</h6>
                                 <p class="small text-muted mb-2">Upload PDFs to create modules.</p>
-                                <form action="/src/process_course_pdfs.php" method="POST" enctype="multipart/form-data">
+                                <form action="<?php echo BASE_URL; ?>/src/process_course_pdfs.php" method="POST" enctype="multipart/form-data">
                                     <input type="hidden" name="course_id" value="'.$c['id'].'">
                                     <div class="mb-2">
                                         <select class="form-select form-select-sm" name="pdf_mode" required>
@@ -135,9 +135,9 @@
                             echo '<div class="d-flex justify-content-between align-items-center bg-light p-2 rounded mb-2 border">
                                     <h6 class="mb-0 text-primary">Current Modules ('.count($modules).')</h6>
                                     <div>
-                                        <a href="/src/export_course.php?course_id='.$c['id'].'&format=md" class="btn btn-sm btn-outline-secondary me-1" title="Export as Markdown">Download .md</a>
-                                        <a href="/src/export_course.php?course_id='.$c['id'].'&format=pdf" target="_blank" class="btn btn-sm btn-outline-dark me-3" title="Export as PDF">Print / Save PDF</a>
-                                        <form action="/src/delete_module.php" method="POST" class="d-inline" onsubmit="return confirm(\'Are you sure you want to delete ALL modules for this course? This will also wipe related assessments and grades.\');">
+                                        <a href="' . BASE_URL . '/src/export_course.php?course_id='.$c['id'].'&format=md" class="btn btn-sm btn-outline-secondary me-1" title="Export as Markdown">Download .md</a>
+                                        <a href="' . BASE_URL . '/src/export_course.php?course_id='.$c['id'].'&format=pdf" target="_blank" class="btn btn-sm btn-outline-dark me-3" title="Export as PDF">Print / Save PDF</a>
+                                        <form action="' . BASE_URL . '/src/delete_module.php" method="POST" class="d-inline" onsubmit="return confirm(\'Are you sure you want to delete ALL modules for this course? This will also wipe related assessments and grades.\');">
                                             <input type="hidden" name="action" value="delete_all">
                                             <input type="hidden" name="course_id" value="'.$c['id'].'">
                                             <button type="submit" class="btn btn-sm btn-danger">Delete All</button>
@@ -153,13 +153,13 @@
                                 echo '<li class="list-group-item d-flex justify-content-between align-items-center">';
                                 echo '<span><strong>Module '.$m['order_num'].':</strong> '.htmlspecialchars($m['title']) . $badge . $pdfBadge . '</span>';
                                 echo '<div>
-                                        <form action="/src/toggle_module.php" method="POST" class="d-inline me-1">
+                                        <form action="<?php echo BASE_URL; ?>/src/toggle_module.php" method="POST" class="d-inline me-1">
                                             <input type="hidden" name="module_id" value="'.$m['id'].'">
                                             <input type="hidden" name="is_active" value="'.($m['is_active'] ? 0 : 1).'">
                                             <button type="submit" class="btn btn-sm '.($m['is_active'] ? 'btn-secondary' : 'btn-success').'">'.($m['is_active'] ? 'Hide' : 'Show').'</button>
                                         </form>
-                                        <a href="/facilitator/module?id='.$m['id'].'" class="btn btn-sm btn-outline-primary me-1">Manage</a>
-                                        <form action="/src/delete_module.php" method="POST" class="d-inline" onsubmit="return confirm(\'Are you sure you want to delete this module and its assessments?\');">
+                                        <a href="' . BASE_URL . '/facilitator/module?id='.$m['id'].'" class="btn btn-sm btn-outline-primary me-1">Manage</a>
+                                        <form action="' . BASE_URL . '/src/delete_module.php" method="POST" class="d-inline" onsubmit="return confirm(\'Are you sure you want to delete this module and its assessments?\');">
                                             <input type="hidden" name="action" value="delete_single">
                                             <input type="hidden" name="module_id" value="'.$m['id'].'">
                                             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
@@ -183,13 +183,13 @@
                             echo '
                             <div class="mb-3 d-flex justify-content-between align-items-center">
                                 <input type="text" class="form-control form-control-sm w-50" placeholder="Search students..." onkeyup="searchStudents('.$c['id'].', this.value)">
-                                <form action="/src/unenroll.php" method="POST" onsubmit="return confirm(\'Unenroll ALL students?\');">
+                                <form action="' . BASE_URL . '/src/unenroll.php" method="POST" onsubmit="return confirm(\'Unenroll ALL students?\');">
                                     <input type="hidden" name="action" value="unenroll_all">
                                     <input type="hidden" name="course_id" value="'.$c['id'].'">
                                     <button type="submit" class="btn btn-sm btn-danger">Unenroll All ('.count($students).')</button>
                                 </form>
                             </div>
-                            <form action="/src/unenroll.php" method="POST">
+                            <form action="<?php echo BASE_URL; ?>/src/unenroll.php" method="POST">
                                 <input type="hidden" name="action" value="unenroll_selected">
                                 <input type="hidden" name="course_id" value="'.$c['id'].'">
                                 <div class="table-responsive border" style="max-height: 400px; overflow-y: auto;">
@@ -241,18 +241,18 @@
                                         <td>'.$a['total_score'].' pts</td>
                                         <td>'.$sch.'</td>
                                         <td>
-                                            <a href="/views/assessment_results.php?id='.$a['id'].'" class="btn btn-sm btn-tsu-primary me-1">View Results</a>
-                                            <form action="/src/toggle_assessment_status.php" method="POST" class="d-inline me-1">
+                                            <a href="' . BASE_URL . '/views/assessment_results.php?id='.$a['id'].'" class="btn btn-sm btn-tsu-primary me-1">View Results</a>
+                                            <form action="<?php echo BASE_URL; ?>/src/toggle_assessment_status.php" method="POST" class="d-inline me-1">
                                                 <input type="hidden" name="assessment_id" value="'.$a['id'].'">
                                                 <input type="hidden" name="is_active" value="'.($a['is_active'] ? 0 : 1).'">
                                                 <button type="submit" class="btn btn-sm '.($a['is_active'] ? 'btn-outline-warning' : 'btn-success').'">'.($a['is_active'] ? 'Disable' : 'Enable').'</button>
                                             </form>
-                                            <form action="/src/toggle_scores.php" method="POST" class="d-inline me-1">
+                                            <form action="<?php echo BASE_URL; ?>/src/toggle_scores.php" method="POST" class="d-inline me-1">
                                                 <input type="hidden" name="assessment_id" value="'.$a['id'].'">
                                                 <input type="hidden" name="scores_released" value="'.($a['scores_released'] ? 0 : 1).'">
                                                 <button type="submit" class="btn btn-sm '.($a['scores_released'] ? 'btn-secondary' : 'btn-success').'">'.($a['scores_released'] ? 'Hide Scores' : 'Release Scores').'</button>
                                             </form>
-                                            <form action="/src/delete_assessment.php" method="POST" class="d-inline" onsubmit="return confirm(\'Cancel and delete this assessment?\');">
+                                            <form action="' . BASE_URL . '/src/delete_assessment.php" method="POST" class="d-inline" onsubmit="return confirm(\'Cancel and delete this assessment?\');">
                                                 <input type="hidden" name="assessment_id" value="'.$a['id'].'">
                                                 <input type="hidden" name="course_id" value="'.$c['id'].'">
                                                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -269,7 +269,7 @@
                             <div class="card-body">
                                 <h6 class="card-title">Generate New Assessment via AI</h6>
                                 <hr>
-                                <form id="saveAssmtForm_'.$c['id'].'" action="/src/save_assessment.php" method="POST">
+                                <form id="saveAssmtForm_'.$c['id'].'" action="' . BASE_URL . '/src/save_assessment.php" method="POST">
                                     <input type="hidden" name="course_id" value="'.$c['id'].'">
                                     
                                     <div class="row mb-3">

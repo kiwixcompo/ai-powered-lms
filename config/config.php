@@ -1,5 +1,8 @@
 <?php
-date_default_timezone_set('Africa/Lagos'); // Fixes the time-lock bug for WAT / UTC+1
+date_default_timezone_set('Africa/Lagos');
+$is_localhost = ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1');
+define('BASE_URL', $is_localhost ? '/CMP_Course_Module' : '');
+ // Fixes the time-lock bug for WAT / UTC+1
 
 if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1') {
     // Local WAMP configuration

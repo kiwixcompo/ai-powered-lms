@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $conn->commit();
             
             $_SESSION['msg'] = "Assessment completed and auto-graded! Your score: $total_awarded";
-            header("Location: /CMP_Course_Module/student");
+            header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/student");
             exit;
 
         } catch (Exception $e) {

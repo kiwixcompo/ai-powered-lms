@@ -160,8 +160,8 @@ if (empty($questions)) {
     <title>Assessment - <?= htmlspecialchars($assessment['title'] ?? 'Course Exam') ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom TSU Theme -->
-    <link href="/assets/css/style.css" rel="stylesheet">
-    <link rel="icon" href="/assets/images/logo.png" type="image/png">
+    <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
+    <link rel="icon" href="<?php echo BASE_URL; ?>/assets/images/logo.png" type="image/png">
     <style>
         body { background-color: #f0f2f5; user-select: none; }
         .timer-header { position: sticky; top: 0; z-index: 1000; background: #dc3545; color: white; padding: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -181,7 +181,7 @@ if (empty($questions)) {
         </div>
     </div>
 
-    <form id="assessmentForm" action="/src/submit_assessment.php" method="POST">
+    <form id="assessmentForm" action="<?php echo BASE_URL; ?>/src/submit_assessment.php" method="POST">
         <input type="hidden" name="assessment_id" value="<?= $assessment_id ?>">
         
         <?php foreach ($questions as $index => $q): ?>

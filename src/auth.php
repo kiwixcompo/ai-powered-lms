@@ -17,16 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['name'] = $user['name'];
 
         if ($user['role'] === 'admin') {
-            header('Location: /CMP_Course_Module/admin');
+            header('Location: ' . BASE_URL . '/admin');
         } elseif ($user['role'] === 'facilitator') {
-            header('Location: /CMP_Course_Module/facilitator');
+            header('Location: ' . BASE_URL . '/facilitator');
         } else {
-            header('Location: /CMP_Course_Module/student');
+            header('Location: ' . BASE_URL . '/student');
         }
         exit;
     } else {
         $_SESSION['error'] = 'Invalid email or password';
-        header('Location: /CMP_Course_Module/login');
+        header('Location: ' . BASE_URL . '/login');
         exit;
     }
 }

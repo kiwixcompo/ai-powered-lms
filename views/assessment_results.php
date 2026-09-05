@@ -42,22 +42,22 @@ $results = $q_stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Assessment Results - <?= htmlspecialchars($assessment['title']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom TSU Theme -->
-    <link href="/assets/css/style.css" rel="stylesheet">
-    <link rel="icon" href="/assets/images/logo.png" type="image/png">
+    <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
+    <link rel="icon" href="<?php echo BASE_URL; ?>/assets/images/logo.png" type="image/png">
     
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark tsu-navbar mb-4">
       <div class="container">
-        <a class="navbar-brand" href="#"><img src="/assets/images/logo.png" alt="TSU"> Facilitator Portal</a>
+        <a class="navbar-brand" href="#"><img src="<?php echo BASE_URL; ?>/assets/images/logo.png" alt="TSU"> Facilitator Portal</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a class="nav-link text-white">Welcome, <?= htmlspecialchars($_SESSION['name']) ?></a></li>
-            <li class="nav-item"><a class="nav-link" href="/facilitator">Back to Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="/src/logout.php">Logout</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo BASE_URL; ?>/facilitator">Back to Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo BASE_URL; ?>/src/logout.php">Logout</a></li>
           </ul>
         </div>
       </div>
@@ -70,8 +70,8 @@ $results = $q_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <h5 class="text-muted">Total Points: <?= $assessment['total_score'] ?> | Target Modules: <?= $assessment['target_modules'] === 'ALL' ? 'Entire Course' : 'Selected' ?></h5>
             </div>
             <div>
-                <a href="/src/export_grades_excel.php?assessment_id=<?= $assessment_id ?>" class="btn btn-success">Export to Excel</a>
-                <a href="/facilitator" class="btn btn-secondary">Back</a>
+                <a href="<?php echo BASE_URL; ?>/src/export_grades_excel.php?assessment_id=<?= $assessment_id ?>" class="btn btn-success">Export to Excel</a>
+                <a href="<?php echo BASE_URL; ?>/facilitator" class="btn btn-secondary">Back</a>
             </div>
         </div>
         

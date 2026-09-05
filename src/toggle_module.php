@@ -17,5 +17,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['msg'] = "Module visibility updated.";
     }
 }
-header("Location: /CMP_Course_Module/facilitator");
+header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/facilitator");
 exit;

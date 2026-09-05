@@ -13,5 +13,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['module_id'])) {
     $stmt->execute([$module_id]);
     $_SESSION['msg'] = "Reverted to Markdown mode.";
 }
-header("Location: /CMP_Course_Module/facilitator/module?id=" . $module_id);
+header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/facilitator/module?id=" . $module_id);
 exit;

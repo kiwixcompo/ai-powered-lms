@@ -3,7 +3,7 @@ session_start();
 require_once 'config/config.php';
 
 $request = $_SERVER['REQUEST_URI'];
-$base_path = '/CMP_Course_Module';
+$base_path = BASE_URL;
 
 $path = str_replace($base_path, '', $request);
 $path = parse_url($path, PHP_URL_PATH);
@@ -11,7 +11,7 @@ $path = parse_url($path, PHP_URL_PATH);
 // Middleware for checking auth
 function checkAuth($allowedRoles = []) {
     if (!isset($_SESSION['user_id'])) {
-        header('Location: /CMP_Course_Module/login');
+        header('Location: ' . BASE_URL . '/login');
         exit;
     }
     if (!empty($allowedRoles) && !in_array($_SESSION['role'], $allowedRoles)) {

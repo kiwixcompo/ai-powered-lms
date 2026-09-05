@@ -63,5 +63,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['student_file'])) {
     }
 }
 
-header('Location: /CMP_Course_Module/admin');
+header('Location: ' . BASE_URL . '/admin');
 exit;
