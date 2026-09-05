@@ -95,8 +95,7 @@ $html_content = $parsedown->text($module['content'] ?? 'No content generated yet
             } else {
                 if ($module['is_pdf_mode'] && !empty($module['pdf_path'])) {
                     
-                    $pdf_full_path = 'uploads/pdfs/' . $module['pdf_path'];
-                    $pdf_b64 = file_exists($pdf_full_path) ? base64_encode(file_get_contents($pdf_full_path)) : '';
+                    $pdf_url = BASE_URL . '/uploads/pdfs/' . $module['pdf_path'];
 
                     echo '
                     <style>
@@ -224,29 +223,27 @@ $html_content = $parsedown->text($module['content'] ?? 'No content generated yet
                         document.getElementById("zoomIn").addEventListener("click", onZoomIn);
                         document.getElementById("zoomOut").addEventListener("click", onZoomOut);
 
-                        // Completely bypass IDM and network requests by embedding the PDF directly into the page as Base64
-                        const pdfBase64 = "'.$pdf_b64.'";
+                        // Fetch the PDF using JS to bypass PHP memory limits and reduce IDM interference
+                        const pdfUrl = "'.$pdf_url.'";
                         
-                        if (!pdfBase64) {
-                            document.getElementById("pdfCanvasContainer").innerHTML = `<div class="alert alert-danger m-3">Failed to load PDF. File missing on server.</div>`;
-                        } else {
-                            // Decode base64 to Uint8Array
-                            const binaryString = atob(pdfBase64);
-                            const bytes = new Uint8Array(binaryString.length);
-                            for (let i = 0; i < binaryString.length; i++) {
-                                bytes[i] = binaryString.charCodeAt(i);
-                            }
-
-                            // Load the PDF directly from memory
-                            pdfjsLib.getDocument({ data: bytes }).promise.then(pdfDoc_ => {
+                        fetch(pdfUrl)
+                            .then(response => {
+                                if (!response.ok) throw new Error("Failed to load PDF. File missing on server.");
+                                return response.blob();
+                            })
+                            .then(blob => {
+                                const objectUrl = URL.createObjectURL(blob);
+                                return pdfjsLib.getDocument(objectUrl).promise;
+                            })
+                            .then(pdfDoc_ => {
                                 pdfDoc = pdfDoc_;
                                 document.getElementById("pageCount").textContent = pdfDoc.numPages;
                                 renderPage(pageNum);
-                            }).catch(err => {
+                            })
+                            .catch(err => {
                                 console.error("PDF Load Error: ", err);
-                                document.getElementById("pdfCanvasContainer").innerHTML = `<div class="alert alert-danger m-3">Failed to load PDF. Error: ${err.message || err}</div>`;
+                                document.getElementById("pdfCanvasContainer").innerHTML = `<div class="alert alert-danger m-3">${err.message || err}</div>`;
                             });
-                        }
                         
                         // Disable right-click to make it harder to download or save images
                         document.getElementById("pdfCanvas").addEventListener("contextmenu", e => e.preventDefault());
