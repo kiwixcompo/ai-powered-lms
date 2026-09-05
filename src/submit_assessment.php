@@ -25,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 die("Time expired. Assessment is automatically closed and submissions are no longer accepted.");
             }
         }
-        // Fetch questions for this assessment for this student
-        $q_stmt = $conn->prepare("SELECT id FROM questions WHERE assessment_id = ? AND student_id = ?");
+        // Fetch questions for this assessment
+        $q_stmt = $conn->prepare("SELECT id FROM questions WHERE assessment_id = ? AND (student_id = ? OR student_id IS NULL)");
         $q_stmt->execute([$assessment_id, $student_id]);
         $questions = $q_stmt->fetchAll(PDO::FETCH_ASSOC);
 
