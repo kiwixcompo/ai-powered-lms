@@ -68,7 +68,7 @@
         <div class="card shadow-sm mb-4 border-dark">
             <div class="card-header tsu-card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">Course Overview & Export Materials</h6>
-                <a href="<?php echo BASE_URL; ?>/src/export_grades_excel.php" class="btn btn-sm btn-success fw-bold">Download All Grades (Excel)</a>
+                <a href="<?php echo BASE_URL; ?>/src/export_grades_excel.php" class="btn btn-sm btn-success fw-bold">Download All Grades (Excel CSV)</a>
             </div>
             <div class="card-body p-0 table-responsive">
                 <div class="table-responsive"><table class="table table-striped table-hover mb-0">
