@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/tsuniver/lms.tsuniversity.ng
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/cp -rf /home/tsuniver/repositories/ai-powered-lms/. $DEPLOYPATH/
