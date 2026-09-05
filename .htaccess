@@ -1,5 +1,18 @@
 RewriteEngine On
-RewriteBase /CMP_Course_Module/
+
+# 1. Clean up visible URLs for GET requests on live server (removes the folder name from the browser URL bar)
+RewriteCond %{HTTP_HOST} !=localhost
+RewriteCond %{HTTP_HOST} !=127.0.0.1
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^CMP_Course_Module/(.*)$ /$1 [R=301,L]
+
+# 2. Silently intercept POST requests (like Logins) to prevent 500 Errors and preserve form data
+RewriteCond %{HTTP_HOST} !=localhost
+RewriteCond %{HTTP_HOST} !=127.0.0.1
+RewriteCond %{REQUEST_METHOD} POST
+RewriteRule ^CMP_Course_Module/(.*)$ $1 [L]
+
+# 3. Route everything else through index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [QSA,L]
