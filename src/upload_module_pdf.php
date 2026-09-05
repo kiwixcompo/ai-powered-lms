@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['pdf_file']) && isset(
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
         if (strtolower($ext) !== 'pdf') {
             $_SESSION['error'] = "Only PDF files are allowed.";
-            header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/facilitator");
+            header("Location: " . BASE_URL . "/facilitator");
             exit;
         }
 
@@ -37,5 +37,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['pdf_file']) && isset(
         $_SESSION['error'] = "Error uploading file.";
     }
 }
-header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/facilitator");
+header("Location: " . BASE_URL . "/facilitator");
 exit;

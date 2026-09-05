@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['course_id'])) {
             }
         }
         $_SESSION['msg'] = "Individual PDF modules successfully created.";
-        header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/facilitator");
+        header("Location: " . BASE_URL . "/facilitator");
         exit;
     } else {
         // Single PDF -> Extract text and let AI split into Markdown modules
@@ -127,9 +127,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['course_id'])) {
         } else {
             $_SESSION['error'] = "Error uploading PDF.";
         }
-        header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/facilitator");
+        header("Location: " . BASE_URL . "/facilitator");
         exit;
     }
 }
-header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/facilitator");
+header("Location: " . BASE_URL . "/facilitator");
 exit;

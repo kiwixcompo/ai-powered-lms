@@ -16,5 +16,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['msg'] = "Assessment scores visibility updated.";
     }
 }
-header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/facilitator");
+header("Location: " . BASE_URL . "/facilitator");
 exit;

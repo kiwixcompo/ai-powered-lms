@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $conn->commit();
             
             // Redirect to auto-grading endpoint (Step 7)
-            header(\"Location: \" . BASE_URL . \"/CMP_Course_Module/src/auto_grade.php?assessment_id=$assessment_id");
+            header("Location: " . BASE_URL . "/src/auto_grade.php?assessment_id=$assessment_id");
             exit;
             
         } catch (Exception $e) {
