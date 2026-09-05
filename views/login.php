@@ -6,6 +6,7 @@
     <title>Login - TSU Learning Management System</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <!-- Custom TSU Theme -->
     <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
     <link rel="icon" href="<?php echo BASE_URL; ?>/assets/images/logo.png" type="image/png">
@@ -21,7 +22,7 @@
             
             <div class="p-4">
                 <?php 
-                    if (session_status() === PHP_SESSION_NONE)                     if (isset($_SESSION['error'])) {
+                    if (isset($_SESSION['error'])) {
                         echo '<div class="alert alert-danger shadow-sm">'.htmlspecialchars($_SESSION['error']).'</div>';
                         unset($_SESSION['error']);
                     }
@@ -33,12 +34,28 @@
                     </div>
                     <div class="mb-4">
                         <label for="password" class="form-label fw-bold">Password</label>
-                        <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="••••••••" required>
+                        <div class="input-group">
+                            <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="••••••••" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-tsu-primary btn-lg w-100 shadow-sm">Sign In</button>
                 </form>
             </div>
         </div>
     </div>
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('bi-eye');
+            this.querySelector('i').classList.toggle('bi-eye-slash');
+        });
+    </script>
 </body>
 </html>
