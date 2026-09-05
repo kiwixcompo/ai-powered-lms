@@ -39,4 +39,14 @@ try {
     echo "Connection failed: " . $e->getMessage();
     exit;
 }
+
+// Track online status globally (updating every 60 seconds max to prevent DB overload)
+if (isset($_SESSION['user_id'])) {
+    if (!isset($_SESSION['last_activity_update']) || (time() - $_SESSION['last_activity_update'] > 60)) {
+        try {
+            $conn->prepare("UPDATE users SET last_activity = CURRENT_TIMESTAMP WHERE id = ?")->execute([$_SESSION['user_id']]);
+            $_SESSION['last_activity_update'] = time();
+        } catch(PDOException $e) {}
+    }
+}
 ?>

@@ -4,18 +4,40 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'faci
     http_response_code(403); exit('Forbidden');
 }
 $course_id = $_GET['course_id'] ?? 'all';
+
 if ($course_id === 'all') {
-    $stmt = $conn->query('SELECT u.name, u.reg_no, COUNT(l.id) as login_count FROM users u JOIN login_logs l ON u.id = l.user_id WHERE u.role = \'student\' GROUP BY u.id ORDER BY login_count DESC LIMIT 50');
+    $stmt = $conn->query('SELECT u.id, u.name, u.reg_no, u.last_activity, COUNT(l.id) as login_count, MAX(l.login_time) as last_login FROM users u JOIN login_logs l ON u.id = l.user_id WHERE u.role = \'student\' GROUP BY u.id ORDER BY login_count DESC LIMIT 50');
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } else {
-    $stmt = $conn->prepare('SELECT u.name, u.reg_no, COUNT(l.id) as login_count FROM users u JOIN enrollments e ON u.id = e.student_id LEFT JOIN login_logs l ON u.id = l.user_id WHERE e.course_id = ? GROUP BY u.id ORDER BY login_count DESC');
+    $stmt = $conn->prepare('SELECT u.id, u.name, u.reg_no, u.last_activity, COUNT(l.id) as login_count, MAX(l.login_time) as last_login FROM users u JOIN enrollments e ON u.id = e.student_id LEFT JOIN login_logs l ON u.id = l.user_id WHERE e.course_id = ? GROUP BY u.id ORDER BY login_count DESC');
     $stmt->execute([$course_id]);
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 $chartData = [];
-foreach ($students as $s) {
-    $chartData[] = ['label' => $s['name'] . ' (' . $s['reg_no'] . ')', 'logins' => (int)$s['login_count']];
+$tableHtml = '<div class="table-responsive"><table class="table table-sm table-hover border">
+    <thead class="table-light"><tr><th>Name</th><th>Reg No</th><th>Total Logins</th><th>Status</th></tr></thead><tbody>';
+
+if (count($students) > 0) {
+    foreach ($students as $s) {
+        $chartData[] = ['label' => $s['name'] . ' (' . $s['reg_no'] . ')', 'logins' => (int)$s['login_count']];
+        
+        $is_online = $s['last_activity'] && (time() - strtotime($s['last_activity']) <= 300);
+        $lastLogin = $s['last_login'] ? date('M j, Y, g:i a', strtotime($s['last_login'])) : 'Never logged in';
+        $status_badge = $is_online ? '<span class="badge bg-success">Online Now</span>' : '<span class="text-muted small">Offline (Last: '.$lastLogin.')</span>';
+        
+        $tableHtml .= '<tr>
+            <td>'.htmlspecialchars($s['name']).'</td>
+            <td>'.htmlspecialchars($s['reg_no']).'</td>
+            <td>'.(int)$s['login_count'].'</td>
+            <td>'.$status_badge.'</td>
+        </tr>';
+    }
+} else {
+    $tableHtml .= '<tr><td colspan="4" class="text-center text-muted py-3">No student activity found</td></tr>';
 }
+$tableHtml .= '</tbody></table></div>';
+
 header('Content-Type: application/json');
-echo json_encode($chartData);
+echo json_encode(['chart' => $chartData, 'table' => $tableHtml]);
 ?>

@@ -202,7 +202,7 @@ try {
                         // --- TAB 2: ENROLLED STUDENTS ---
                         echo '<div class="tab-pane fade" id="students-pane-'.$c['id'].'" role="tabpanel">';
                         $en_stmt = $conn->prepare("
-                            SELECT u.id, u.name, u.reg_no, COUNT(l.id) as login_count, MAX(l.login_time) as last_login 
+                            SELECT u.id, u.name, u.reg_no, u.last_activity, COUNT(l.id) as login_count, MAX(l.login_time) as last_login 
                             FROM users u 
                             JOIN enrollments e ON u.id = e.student_id 
                             LEFT JOIN login_logs l ON u.id = l.user_id 
@@ -248,18 +248,23 @@ try {
                                                 <th>Name</th>
                                                 <th>Registration No</th>
                                                 <th>Total Logins</th>
-                                                <th>Last Login</th>
+                                                <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>';
                             foreach ($students as $s) {
-                                $lastLogin = $s['last_login'] ? date('M j, Y, g:i a', strtotime($s['last_login'])) : 'Never';
+                                // Online logic (active within the last 5 minutes)
+                                $is_online = $s['last_activity'] && (time() - strtotime($s['last_activity']) <= 300);
+                                $lastLogin = $s['last_login'] ? date('M j, Y, g:i a', strtotime($s['last_login'])) : 'Never logged in';
+                                
+                                $status_badge = $is_online ? '<span class="badge bg-success">Online Now</span>' : '<span class="text-muted small">Offline<br>(Last: '.$lastLogin.')</span>';
+
                                 echo '<tr>
                                         <td><input type="checkbox" name="student_ids[]" value="'.$s['id'].'" class="student-chk-'.$c['id'].'"></td>
                                         <td class="student-name">'.htmlspecialchars($s['name']).'</td>
                                         <td class="student-reg">'.htmlspecialchars($s['reg_no']).'</td>
                                         <td>'.(int)$s['login_count'].'</td>
-                                        <td>'.$lastLogin.'</td>
+                                        <td>'.$status_badge.'</td>
                                       </tr>';
                             }
                             echo '      </tbody>

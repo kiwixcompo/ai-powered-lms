@@ -296,8 +296,15 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="chart-container" style="position: relative; height:400px; width:100%">
-                            <canvas id="adminLoginChart"></canvas>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="chart-container" style="position: relative; height:400px; width:100%">
+                                    <canvas id="adminLoginChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-5" id="adminLoginTableContainer" style="max-height: 400px; overflow-y: auto;">
+                                <!-- Table will be loaded here via JS -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -357,8 +364,10 @@
                 const response = await fetch(`<?php echo BASE_URL; ?>/src/get_login_stats.php?course_id=${courseId}`);
                 const data = await response.json();
                 
-                const labels = data.map(d => d.label);
-                const counts = data.map(d => d.logins);
+                document.getElementById('adminLoginTableContainer').innerHTML = data.table;
+
+                const labels = data.chart.map(d => d.label);
+                const counts = data.chart.map(d => d.logins);
 
                 const ctx = document.getElementById('adminLoginChart').getContext('2d');
                 if (adminChartInstance) {
