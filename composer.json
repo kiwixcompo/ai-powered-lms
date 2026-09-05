@@ -5,5 +5,8 @@
         "smalot/pdfparser": "^2.12",
         "setasign/fpdf": "^1.9",
         "setasign/fpdi": "^2.6"
+    },
+    "config": {
+        "platform-check": false
     }
 }
