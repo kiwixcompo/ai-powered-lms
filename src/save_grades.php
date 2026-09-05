@@ -43,19 +43,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             foreach ($grades as $g) {
                 $q_id = $g['question_id'];
-                $score = intval($g['score_awarded']);
+                $score = floatval($g['score_awarded']);
                 $total_awarded += $score;
                 
                 $update_resp->execute([$score, $assessment_id, $student_id, $q_id]);
             }
 
+            // The user requested: "if it's a decimal number, the system is expected to provide a round figure as the score."
+            $rounded_total = round($total_awarded);
+
             // Save final grade
             $insert_grade = $conn->prepare("INSERT INTO grades (assessment_id, student_id, total_score_awarded) VALUES (?, ?, ?)");
-            $insert_grade->execute([$assessment_id, $student_id, $total_awarded]);
+            $insert_grade->execute([$assessment_id, $student_id, $rounded_total]);
 
             $conn->commit();
             
-            $_SESSION['msg'] = "Assessment completed and auto-graded! Your score: $total_awarded";
+            $_SESSION['msg'] = "Assessment submitted successfully! Auto-graded score: {$rounded_total}";
             header("Location: " . BASE_URL . "/student");
             exit;
 

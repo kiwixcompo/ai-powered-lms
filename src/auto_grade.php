@@ -49,20 +49,25 @@ if (!$data) die("No responses found to grade.");
                 let grades = [];
                 
                 for (let row of assessmentData) {
-                    let max = parseInt(row.max_score, 10);
+                    let max = parseFloat(row.max_score);
                     let correct = String(row.correct_answer || "").toLowerCase().trim();
                     let student = String(row.answer_text || "").toLowerCase().trim();
                     
                     let score = 0;
-                    if (correct === student) {
+                    
+                    // If the student left it blank, they get 0 (avoids empty string matching correct)
+                    if (student === "") {
+                        score = 0;
+                    }
+                    else if (correct === student) {
                         score = max;
                     } else if (correct.length > 3 && student.includes(correct)) {
                         score = max;
                     } else if (student.length > 3 && correct.includes(student)) {
-                        score = Math.ceil(max / 2);
+                        score = max / 2; // Exact half for partial matching
                     } else if (student.length > 10) {
                         // Give a tiny bit of credit for trying if it's a long answer
-                        score = Math.floor(max * 0.1); 
+                        score = max * 0.1; 
                     }
                     
                     grades.push({
