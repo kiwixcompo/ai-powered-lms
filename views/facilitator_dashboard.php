@@ -76,7 +76,7 @@
                             <div class="col-md-4 border-end">
                                 <h6>Option 1: Upload Markdown</h6>
                                 <p class="small text-muted mb-2">Upload a single Markdown file (.md).</p>
-                                <form action="<?php echo BASE_URL; ?>/src/process_markdown.php" method="POST" enctype="multipart/form-data">
+                                <form action="' . BASE_URL . '/src/process_markdown.php" method="POST" enctype="multipart/form-data">
                                     <input type="hidden" name="course_id" value="'.$c['id'].'">
                                     <div class="mb-2">
                                         <input type="file" class="form-control form-control-sm" name="markdown_file" accept=".md, .txt" required>
@@ -110,7 +110,7 @@
                             <div class="col-md-4">
                                 <h6>Option 3: Upload PDF(s)</h6>
                                 <p class="small text-muted mb-2">Upload PDFs to create modules.</p>
-                                <form action="<?php echo BASE_URL; ?>/src/process_course_pdfs.php" method="POST" enctype="multipart/form-data">
+                                <form action="' . BASE_URL . '/src/process_course_pdfs.php" method="POST" enctype="multipart/form-data">
                                     <input type="hidden" name="course_id" value="'.$c['id'].'">
                                     <div class="mb-2">
                                         <select class="form-select form-select-sm" name="pdf_mode" required>
@@ -153,7 +153,7 @@
                                 echo '<li class="list-group-item d-flex justify-content-between align-items-center">';
                                 echo '<span><strong>Module '.$m['order_num'].':</strong> '.htmlspecialchars($m['title']) . $badge . $pdfBadge . '</span>';
                                 echo '<div>
-                                        <form action="<?php echo BASE_URL; ?>/src/toggle_module.php" method="POST" class="d-inline me-1">
+                                        <form action="' . BASE_URL . '/src/toggle_module.php" method="POST" class="d-inline me-1">
                                             <input type="hidden" name="module_id" value="'.$m['id'].'">
                                             <input type="hidden" name="is_active" value="'.($m['is_active'] ? 0 : 1).'">
                                             <button type="submit" class="btn btn-sm '.($m['is_active'] ? 'btn-secondary' : 'btn-success').'">'.($m['is_active'] ? 'Hide' : 'Show').'</button>
@@ -189,7 +189,7 @@
                                     <button type="submit" class="btn btn-sm btn-danger">Unenroll All ('.count($students).')</button>
                                 </form>
                             </div>
-                            <form action="<?php echo BASE_URL; ?>/src/unenroll.php" method="POST">
+                            <form action="' . BASE_URL . '/src/unenroll.php" method="POST">
                                 <input type="hidden" name="action" value="unenroll_selected">
                                 <input type="hidden" name="course_id" value="'.$c['id'].'">
                                 <div class="table-responsive border" style="max-height: 400px; overflow-y: auto;">
@@ -242,12 +242,12 @@
                                         <td>'.$sch.'</td>
                                         <td>
                                             <a href="' . BASE_URL . '/views/assessment_results.php?id='.$a['id'].'" class="btn btn-sm btn-tsu-primary me-1">View Results</a>
-                                            <form action="<?php echo BASE_URL; ?>/src/toggle_assessment_status.php" method="POST" class="d-inline me-1">
+                                            <form action="' . BASE_URL . '/src/toggle_assessment_status.php" method="POST" class="d-inline me-1">
                                                 <input type="hidden" name="assessment_id" value="'.$a['id'].'">
                                                 <input type="hidden" name="is_active" value="'.($a['is_active'] ? 0 : 1).'">
                                                 <button type="submit" class="btn btn-sm '.($a['is_active'] ? 'btn-outline-warning' : 'btn-success').'">'.($a['is_active'] ? 'Disable' : 'Enable').'</button>
                                             </form>
-                                            <form action="<?php echo BASE_URL; ?>/src/toggle_scores.php" method="POST" class="d-inline me-1">
+                                            <form action="' . BASE_URL . '/src/toggle_scores.php" method="POST" class="d-inline me-1">
                                                 <input type="hidden" name="assessment_id" value="'.$a['id'].'">
                                                 <input type="hidden" name="scores_released" value="'.($a['scores_released'] ? 0 : 1).'">
                                                 <button type="submit" class="btn btn-sm '.($a['scores_released'] ? 'btn-secondary' : 'btn-success').'">'.($a['scores_released'] ? 'Hide Scores' : 'Release Scores').'</button>
