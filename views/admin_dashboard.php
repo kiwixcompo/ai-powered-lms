@@ -6,12 +6,14 @@
     <title>Admin Dashboard</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>body { background-color: #f8f9fa; }</style>
+    <!-- Custom TSU Theme -->
+    <link href="/CMP_Course_Module/assets/css/style.css" rel="stylesheet">
+    <link rel="icon" href="/CMP_Course_Module/assets/images/logo.png" type="image/png">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark tsu-navbar mb-4">
       <div class="container">
-        <a class="navbar-brand" href="#">Admin Portal</a>
+        <a class="navbar-brand" href="#"><img src="/CMP_Course_Module/assets/images/logo.png" alt="TSU"> Admin Portal</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -64,7 +66,7 @@
         </div>
 
         <div class="card shadow-sm mb-4 border-dark">
-            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <div class="card-header tsu-card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">Course Overview & Export Materials</h6>
                 <a href="/CMP_Course_Module/src/export_grades_excel.php" class="btn btn-sm btn-success fw-bold">Download All Grades (Excel)</a>
             </div>
@@ -137,7 +139,7 @@
                                     <div class="mb-3">
                                         <input type="text" class="form-control form-control-sm" name="category" placeholder="Student Category (e.g. 100 Level CS)" required>
                                     </div>
-                                    <button type="submit" class="btn btn-sm btn-primary w-100">Add Student</button>
+                                    <button type="submit" class="btn btn-sm btn-tsu-primary w-100">Add Student</button>
                                 </form>
                             </div>
                             
@@ -249,7 +251,7 @@
                                     <div class="mb-2"><input type="text" class="form-control" name="name" placeholder="Name" required></div>
                                     <div class="mb-2"><input type="email" class="form-control" name="email" placeholder="Email" required></div>
                                     <div class="mb-2"><input type="password" class="form-control" name="password" placeholder="Password" required></div>
-                                    <button type="submit" class="btn btn-warning w-100">Create Facilitator</button>
+                                    <button type="submit" class="btn btn-tsu-accent w-100">Create Facilitator</button>
                                 </form>
                             </div>
                             <div class="col-md-6">

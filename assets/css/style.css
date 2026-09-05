@@ -1,0 +1,147 @@
+/* Taraba State University (TSU) Brand Theme */
+:root {
+    --tsu-blue: #233588; /* Navy Blue from the logo outer ring */
+    --tsu-gold: #FFC107; /* Gold/Yellow from the ribbon/stars */
+    --tsu-light-blue: #64C5F0; /* Inner sky blue */
+    --tsu-bg-color: #f4f6f9; /* Soft off-white for app background */
+    --tsu-text-dark: #333333;
+}
+
+body {
+    background-color: var(--tsu-bg-color) !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--tsu-text-dark);
+}
+
+/* Navbar Styling */
+.tsu-navbar {
+    background-color: var(--tsu-blue) !important;
+    border-bottom: 4px solid var(--tsu-gold);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.tsu-navbar .navbar-brand {
+    font-weight: bold;
+    color: #ffffff !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tsu-navbar .navbar-brand img {
+    height: 40px;
+    width: auto;
+}
+
+.tsu-navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+}
+
+.tsu-navbar .nav-link:hover {
+    color: var(--tsu-gold) !important;
+}
+
+/* Cards & Containers */
+.tsu-card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tsu-card:hover {
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.tsu-card-header {
+    background-color: var(--tsu-blue);
+    color: white;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+    border-bottom: 3px solid var(--tsu-gold);
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn-tsu-primary {
+    background-color: var(--tsu-blue);
+    color: white;
+    border: 2px solid var(--tsu-blue);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-tsu-primary:hover {
+    background-color: #1a2766;
+    border-color: #1a2766;
+    color: white;
+}
+
+.btn-tsu-accent {
+    background-color: var(--tsu-gold);
+    color: #000;
+    border: 2px solid var(--tsu-gold);
+    font-weight: 600;
+}
+
+.btn-tsu-accent:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+    color: #000;
+}
+
+/* Login Page Specifics */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--tsu-blue) 0%, var(--tsu-light-blue) 100%);
+}
+
+.login-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-header {
+    background: var(--tsu-blue);
+    padding: 30px 20px;
+    text-align: center;
+    border-bottom: 5px solid var(--tsu-gold);
+}
+
+.login-header img {
+    height: 80px;
+    margin-bottom: 15px;
+}
+
+.login-header h3 {
+    color: white;
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.4rem;
+}
+
+/* Tables */
+.tsu-table thead {
+    background-color: var(--tsu-blue);
+    color: white;
+}
+
+/* Accordions */
+.accordion-button:not(.collapsed) {
+    background-color: rgba(35, 53, 136, 0.1);
+    color: var(--tsu-blue);
+    font-weight: bold;
+}
+
+.accordion-button:focus {
+    border-color: var(--tsu-gold);
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+}

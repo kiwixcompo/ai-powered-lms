@@ -159,6 +159,9 @@ if (empty($questions)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assessment - <?= htmlspecialchars($assessment['title'] ?? 'Course Exam') ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom TSU Theme -->
+    <link href="/CMP_Course_Module/assets/css/style.css" rel="stylesheet">
+    <link rel="icon" href="/CMP_Course_Module/assets/images/logo.png" type="image/png">
     <style>
         body { background-color: #f0f2f5; user-select: none; }
         .timer-header { position: sticky; top: 0; z-index: 1000; background: #dc3545; color: white; padding: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -171,7 +174,7 @@ if (empty($questions)) {
 </div>
 
 <div class="container mt-4 mb-5 pb-5">
-    <div class="card shadow-sm mb-4">
+    <div class="card tsu-card mb-4">
         <div class="card-body text-center">
             <h2><?= htmlspecialchars($assessment['course_title']) ?></h2>
             <h4 class="text-muted"><?= htmlspecialchars($assessment['title'] ?? 'Course Exam') ?></h4>
@@ -204,7 +207,7 @@ if (empty($questions)) {
             </div>
         <?php endforeach; ?>
         
-        <button type="submit" class="btn btn-primary btn-lg w-100 mt-3 shadow">Submit Assessment</button>
+        <button type="submit" class="btn btn-tsu-primary btn-lg w-100 mt-3 shadow">Submit Assessment</button>
     </form>
 </div>
 

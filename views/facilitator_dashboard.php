@@ -6,13 +6,16 @@
     <title>Facilitator Dashboard</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom TSU Theme -->
+    <link href="/CMP_Course_Module/assets/css/style.css" rel="stylesheet">
+    <link rel="icon" href="/CMP_Course_Module/assets/images/logo.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
-    <style>body { background-color: #f8f9fa; }</style>
+    
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark tsu-navbar mb-4">
       <div class="container">
-        <a class="navbar-brand" href="#">Facilitator Portal</a>
+        <a class="navbar-brand" href="#"><img src="/CMP_Course_Module/assets/images/logo.png" alt="TSU"> Facilitator Portal</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -40,9 +43,9 @@
                 if (count($courses) > 0) {
                     foreach ($courses as $index => $c) {
                         echo '<div class="col-12 mb-4">';
-                        echo '<div class="card shadow-sm h-100 accordion-item">';
+                        echo '<div class="card tsu-card h-100 accordion-item">';
                         
-                        echo '<div class="card-header bg-dark text-white accordion-header cursor-pointer" id="heading_'.$c['id'].'" data-bs-toggle="collapse" data-bs-target="#collapse_'.$c['id'].'" style="cursor: pointer;">';
+                        echo '<div class="card-header tsu-card-header accordion-header cursor-pointer" id="heading_'.$c['id'].'" data-bs-toggle="collapse" data-bs-target="#collapse_'.$c['id'].'" style="cursor: pointer;">';
                         echo '<h5 class="mb-0">'.htmlspecialchars($c['code'] . ' - ' . $c['title']).'</h5>';
                         echo '</div>';
                         
@@ -78,7 +81,7 @@
                                     <div class="mb-2">
                                         <input type="file" class="form-control form-control-sm" name="markdown_file" accept=".md, .txt" required>
                                     </div>
-                                    <button type="submit" class="btn btn-sm btn-primary w-100">Process & Create</button>
+                                    <button type="submit" class="btn btn-sm btn-tsu-primary w-100">Process & Create</button>
                                 </form>
                             </div>
                             <div class="col-md-4 border-end">
@@ -238,7 +241,7 @@
                                         <td>'.$a['total_score'].' pts</td>
                                         <td>'.$sch.'</td>
                                         <td>
-                                            <a href="/CMP_Course_Module/views/assessment_results.php?id='.$a['id'].'" class="btn btn-sm btn-primary me-1">View Results</a>
+                                            <a href="/CMP_Course_Module/views/assessment_results.php?id='.$a['id'].'" class="btn btn-sm btn-tsu-primary me-1">View Results</a>
                                             <form action="/CMP_Course_Module/src/toggle_assessment_status.php" method="POST" class="d-inline me-1">
                                                 <input type="hidden" name="assessment_id" value="'.$a['id'].'">
                                                 <input type="hidden" name="is_active" value="'.($a['is_active'] ? 0 : 1).'">

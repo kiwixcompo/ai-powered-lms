@@ -3,35 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Course Module</title>
+    <title>Login - TSU Learning Management System</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f4f7f6; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .login-card { width: 100%; max-width: 400px; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: #fff; }
-    </style>
+    <!-- Custom TSU Theme -->
+    <link href="/CMP_Course_Module/assets/css/style.css" rel="stylesheet">
+    <link rel="icon" href="/CMP_Course_Module/assets/images/logo.png" type="image/png">
 </head>
 <body>
-    <div class="login-card">
-        <h3 class="text-center mb-4">Course Module Login</h3>
-        <?php 
-            if (session_status() === PHP_SESSION_NONE) session_start();
-            if (isset($_SESSION['error'])) {
-                echo '<div class="alert alert-danger">'.htmlspecialchars($_SESSION['error']).'</div>';
-                unset($_SESSION['error']);
-            }
-        ?>
-        <form action="/CMP_Course_Module/src/auth.php" method="POST">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email or Registration Number</label>
-                <input type="text" class="form-control" id="email" name="email" placeholder="e.g. admin@example.com or CMP/2023/001" required>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="/CMP_Course_Module/assets/images/logo.png" alt="TSU Logo">
+                <h3>Taraba State University</h3>
+                <small class="text-light">Learning Management System</small>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+            
+            <div class="p-4">
+                <?php 
+                    if (session_status() === PHP_SESSION_NONE) session_start();
+                    if (isset($_SESSION['error'])) {
+                        echo '<div class="alert alert-danger shadow-sm">'.htmlspecialchars($_SESSION['error']).'</div>';
+                        unset($_SESSION['error']);
+                    }
+                ?>
+                <form action="/CMP_Course_Module/src/auth.php" method="POST">
+                    <div class="mb-4">
+                        <label for="email" class="form-label fw-bold">Email or Reg Number</label>
+                        <input type="text" class="form-control form-control-lg" id="email" name="email" placeholder="Enter your ID..." required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-bold">Password</label>
+                        <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-tsu-primary btn-lg w-100 shadow-sm">Sign In</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
-        </form>
+        </div>
     </div>
 </body>
 </html>
