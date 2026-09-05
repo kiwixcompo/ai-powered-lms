@@ -479,7 +479,12 @@ try {
                     if (!aiReq.ok) throw new Error("Pollinations API returned error " + aiReq.status);
                     responseText = await aiReq.text();
                 } else {
-                    responseText = await puter.ai.chat(prompt);
+                    let puterResponse = await puter.ai.chat(prompt);
+                    if (typeof puterResponse === 'object' && puterResponse !== null) {
+                        responseText = puterResponse?.message?.content || puterResponse?.text || JSON.stringify(puterResponse);
+                    } else {
+                        responseText = String(puterResponse);
+                    }
                 }
                 
                 document.getElementById('mdContent_' + courseId).value = responseText;
@@ -575,7 +580,13 @@ OUTPUT STRICTLY JSON ONLY. No markdown blocks, no other text.`;
                     if (!aiReq.ok) throw new Error("Pollinations API returned error " + aiReq.status);
                     responseText = await aiReq.text();
                 } else {
-                    responseText = await puter.ai.chat(prompt);
+                    let puterResponse = await puter.ai.chat(prompt);
+                    // Puter might return an object in v2 (e.g., { message: { content: "..." } } or { text: "..." })
+                    if (typeof puterResponse === 'object' && puterResponse !== null) {
+                        responseText = puterResponse?.message?.content || puterResponse?.text || JSON.stringify(puterResponse);
+                    } else {
+                        responseText = String(puterResponse);
+                    }
                 }
 
                 // Clean up JSON block if AI wraps it in markdown
