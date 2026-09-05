@@ -1,0 +1,16 @@
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP Warning:  Undefined array key "HTTP_HOST" in C:\wamp64\www\CMP_Course_Module\config\config.php on line 19
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP Stack trace:
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP   1. {main}() C:\wamp64\www\CMP_Course_Module\temp.php:0
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP   2. require() C:\wamp64\www\CMP_Course_Module\temp.php:1
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP Warning:  Undefined array key "HTTP_HOST" in C:\wamp64\www\CMP_Course_Module\config\config.php on line 19
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP Stack trace:
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP   1. {main}() C:\wamp64\www\CMP_Course_Module\temp.php:0
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP   2. require() C:\wamp64\www\CMP_Course_Module\temp.php:1
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP Warning:  Undefined array key "HTTP_HOST" in C:\wamp64\www\CMP_Course_Module\config\config.php on line 21
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP Stack trace:
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP   1. {main}() C:\wamp64\www\CMP_Course_Module\temp.php:0
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP   2. require() C:\wamp64\www\CMP_Course_Module\temp.php:1
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP Warning:  Undefined array key "HTTP_HOST" in C:\wamp64\www\CMP_Course_Module\config\config.php on line 21
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP Stack trace:
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP   1. {main}() C:\wamp64\www\CMP_Course_Module\temp.php:0
+[05-Sep-2026 13:22:58 Africa/Lagos] PHP   2. require() C:\wamp64\www\CMP_Course_Module\temp.php:1
