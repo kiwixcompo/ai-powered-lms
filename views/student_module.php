@@ -1,4 +1,5 @@
 <?php
+try {
 require_once 'config/config.php';
 $module_id = $_GET['id'] ?? null;
 if (!$module_id) die("Module ID required.");
@@ -55,6 +56,9 @@ foreach ($assessments as $a) {
 require_once 'vendor/autoload.php';
 $parsedown = new Parsedown();
 $html_content = $parsedown->text($module['content'] ?? 'No content generated yet.');
+} catch (\Throwable $e) {
+    die("FATAL ERROR IN STUDENT MODULE: " . $e->getMessage() . " on line " . $e->getLine());
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
