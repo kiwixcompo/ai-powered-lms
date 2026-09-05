@@ -46,14 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LMS Installer - Taraba State University</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/CMP_Course_Module/assets/css/style.css" rel="stylesheet">
-    <link rel="icon" href="/CMP_Course_Module/assets/images/logo.png" type="image/png">
+    <link href="/assets/css/style.css" rel="stylesheet">
+    <link rel="icon" href="/assets/images/logo.png" type="image/png">
 </head>
 <body class="bg-light">
     <div class="container mt-5" style="max-width: 600px;">
         <div class="card tsu-card shadow">
             <div class="card-header tsu-card-header text-center py-4">
-                <img src="/CMP_Course_Module/assets/images/logo.png" alt="TSU" height="60" class="mb-2">
+                <img src="/assets/images/logo.png" alt="TSU" height="60" class="mb-2">
                 <h4 class="mb-0 text-white">LMS Database & Admin Setup</h4>
             </div>
             <div class="card-body p-4">
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if ($success): ?>
                     <div class="alert alert-success shadow-sm">
                         <h5><?= htmlspecialchars($success) ?></h5>
-                        <a href="/CMP_Course_Module/login" class="btn btn-tsu-primary mt-3 w-100">Go to Login Page</a>
+                        <a href="/login" class="btn btn-tsu-primary mt-3 w-100">Go to Login Page</a>
                     </div>
                 <?php else: ?>
                     <div class="alert alert-info">

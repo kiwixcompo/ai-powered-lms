@@ -7,20 +7,20 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom TSU Theme -->
-    <link href="/CMP_Course_Module/assets/css/style.css" rel="stylesheet">
-    <link rel="icon" href="/CMP_Course_Module/assets/images/logo.png" type="image/png">
+    <link href="/assets/css/style.css" rel="stylesheet">
+    <link rel="icon" href="/assets/images/logo.png" type="image/png">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark tsu-navbar mb-4">
       <div class="container">
-        <a class="navbar-brand" href="#"><img src="/CMP_Course_Module/assets/images/logo.png" alt="TSU"> Student Portal</a>
+        <a class="navbar-brand" href="#"><img src="/assets/images/logo.png" alt="TSU"> Student Portal</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a class="nav-link text-white">Welcome, <?= htmlspecialchars($_SESSION['name']) ?></a></li>
-            <li class="nav-item"><a class="nav-link" href="/CMP_Course_Module/src/logout.php">Logout</a></li>
+            <li class="nav-item"><a class="nav-link" href="/src/logout.php">Logout</a></li>
           </ul>
         </div>
       </div>
@@ -46,7 +46,7 @@
                 echo '<h5 class="alert-heading">Upcoming Course Assessments!</h5><ul>';
                 foreach ($upcoming as $up) {
                     $date = date('F j, Y, g:i a', strtotime($up['scheduled_date']));
-                    echo "<li><a href='/CMP_Course_Module/student/assessment?id={$up['assessment_id']}' class='text-decoration-none fw-bold text-dark'>{$up['course_code']} - {$up['assessment_title']}</a>: Scheduled for $date ({$up['timer_minutes']} minutes)</li>";
+                    echo "<li><a href='/student/assessment?id={$up['assessment_id']}' class='text-decoration-none fw-bold text-dark'>{$up['course_code']} - {$up['assessment_title']}</a>: Scheduled for $date ({$up['timer_minutes']} minutes)</li>";
                 }
                 echo '</ul></div>';
             }
@@ -97,7 +97,7 @@
                                         echo '<span class="badge bg-info rounded-pill text-dark">Graded (Awaiting Release)</span>';
                                     }
                                 } else {
-                                    echo '<a href="/CMP_Course_Module/student/module?id='.$m['id'].'" class="btn btn-sm btn-outline-success">View Notes & Assessments</a>';
+                                    echo '<a href="/student/module?id='.$m['id'].'" class="btn btn-sm btn-outline-success">View Notes & Assessments</a>';
                                 }
                                 echo '</li>';
                             }
@@ -151,7 +151,7 @@
                                     } elseif ($is_locked) {
                                         echo '<span class="badge bg-secondary">Locked until '.date('M j, g:i a', strtotime($a['scheduled_date'])).'</span>';
                                     } else {
-                                        echo '<a href="/CMP_Course_Module/student/assessment?id='.$a['id'].'" class="btn btn-sm btn-tsu-accent text-dark fw-bold">Take Assessment</a>';
+                                        echo '<a href="/student/assessment?id='.$a['id'].'" class="btn btn-sm btn-tsu-accent text-dark fw-bold">Take Assessment</a>';
                                     }
                                 }
                                 echo '</li>';

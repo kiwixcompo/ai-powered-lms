@@ -31,8 +31,8 @@ if (!$module) die("Module not found.");
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="/CMP_Course_Module/facilitator">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="/CMP_Course_Module/src/logout.php">Logout</a></li>
+        <li class="nav-item"><a class="nav-link" href="/facilitator">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="/src/logout.php">Logout</a></li>
       </ul>
     </div>
   </div>
@@ -49,7 +49,7 @@ if (!$module) die("Module not found.");
                     <h5 class="mb-0">Manage Course Content</h5>
                 </div>
                 <div class="card-body">
-                    <form id="saveContentForm" action="/CMP_Course_Module/src/save_module_content.php" method="POST">
+                    <form id="saveContentForm" action="/src/save_module_content.php" method="POST">
                         <input type="hidden" name="module_id" value="<?= $module['id'] ?>">
                         <div class="mb-3">
                             <label class="form-label">Module Content (Markdown)</label>
@@ -72,7 +72,7 @@ if (!$module) die("Module not found.");
                         <div class="alert alert-success">
                             This module is currently in PDF Mode. Students will see the uploaded PDF instead of the Markdown text.
                             <br><br>
-                            <a href="/CMP_Course_Module/uploads/pdfs/<?= htmlspecialchars($module['pdf_path']) ?>" target="_blank" class="btn btn-sm btn-outline-dark">View Current PDF</a>
+                            <a href="/uploads/pdfs/<?= htmlspecialchars($module['pdf_path']) ?>" target="_blank" class="btn btn-sm btn-outline-dark">View Current PDF</a>
                         </div>
                     <?php else: ?>
                         <div class="alert alert-info">
@@ -80,7 +80,7 @@ if (!$module) die("Module not found.");
                         </div>
                     <?php endif; ?>
 
-                    <form action="/CMP_Course_Module/src/upload_module_pdf.php" method="POST" enctype="multipart/form-data">
+                    <form action="/src/upload_module_pdf.php" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="module_id" value="<?= $module['id'] ?>">
                         <div class="mb-3">
                             <label class="form-label">Upload Course Material (.pdf)</label>
@@ -90,7 +90,7 @@ if (!$module) die("Module not found.");
                     </form>
                     
                     <?php if ($module['is_pdf_mode']): ?>
-                    <form action="/CMP_Course_Module/src/disable_pdf_mode.php" method="POST" class="mt-3" onsubmit="return confirm('Switch back to Markdown mode?');">
+                    <form action="/src/disable_pdf_mode.php" method="POST" class="mt-3" onsubmit="return confirm('Switch back to Markdown mode?');">
                         <input type="hidden" name="module_id" value="<?= $module['id'] ?>">
                         <button type="submit" class="btn btn-outline-secondary w-100">Revert to Markdown Mode</button>
                     </form>
