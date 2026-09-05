@@ -1,3 +1,54 @@
+<?php
+require_once __DIR__ . '/../config/config.php';
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
+    header('Location: ' . BASE_URL . '/login'); exit;
+}
+
+try {
+// ─── Pull all data ────────────────────────────────────────────────
+// Enrolled courses
+$stmt = $conn->prepare("SELECT c.id, c.code, c.title, c.description FROM courses c JOIN enrollments e ON c.id = e.course_id WHERE e.student_id = ? ORDER BY c.code");
+$stmt->execute([$_SESSION['user_id']]);
+$courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// All assessments for enrolled courses (with grade if taken)
+$all_assess_stmt = $conn->prepare("
+    SELECT a.id, a.course_id, a.title, a.timer_minutes, a.total_score, a.scheduled_date, a.is_active, a.scores_released,
+           c.code as course_code, c.title as course_title,
+           g.score as student_score, g.id as grade_id
+    FROM assessments a
+    JOIN courses c ON a.course_id = c.id
+    JOIN enrollments e ON c.id = e.course_id
+    LEFT JOIN grades g ON g.assessment_id = a.id AND g.student_id = ?
+    WHERE e.student_id = ?
+    ORDER BY a.scheduled_date ASC
+");
+$all_assess_stmt->execute([$_SESSION['user_id'], $_SESSION['user_id']]);
+$all_assessments = $all_assess_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Categorise
+$active_now = []; $upcoming = []; $completed = []; $closed = [];
+foreach ($all_assessments as $a) {
+    if ($a['grade_id'])       { $completed[] = $a; continue; }
+    if ($a['is_active'] == 0) { $closed[]    = $a; continue; }
+    if (!empty($a['scheduled_date'])) {
+        $sch = strtotime($a['scheduled_date']);
+        $end = $sch + ($a['timer_minutes'] * 60) + 60;
+        if ($sch > time())     { $upcoming[]  = $a; }
+        elseif (time() > $end) { $closed[]    = $a; }
+        else                   { $active_now[] = $a; }
+    } else {
+        $active_now[] = $a;
+    }
+}
+$total_courses   = count($courses);
+$total_completed = count($completed);
+$total_active    = count($active_now);
+$total_upcoming  = count($upcoming);
+} catch (\Throwable $e) {
+    die("Dashboard error: " . $e->getMessage() . " (line " . $e->getLine() . ")");
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,62 +122,7 @@
 </head>
 <body>
 
-<?php
-require_once 'config/config.php';
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
-    header('Location: ' . BASE_URL . '/login'); exit;
-}
 
-// ─── Pull all data ────────────────────────────────────────────────
-// Enrolled courses
-$stmt = $conn->prepare("SELECT c.id, c.code, c.title, c.description FROM courses c JOIN enrollments e ON c.id = e.course_id WHERE e.student_id = ? ORDER BY c.code");
-$stmt->execute([$_SESSION['user_id']]);
-$courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// All assessments for enrolled courses (with grade if taken)
-$all_assess_stmt = $conn->prepare("
-    SELECT a.id, a.course_id, a.title, a.timer_minutes, a.total_score, a.scheduled_date, a.is_active, a.scores_released,
-           c.code as course_code, c.title as course_title,
-           g.score as student_score, g.id as grade_id
-    FROM assessments a
-    JOIN courses c ON a.course_id = c.id
-    JOIN enrollments e ON c.id = e.course_id
-    LEFT JOIN grades g ON g.assessment_id = a.id AND g.student_id = ?
-    WHERE e.student_id = ?
-    ORDER BY a.scheduled_date ASC
-");
-$all_assess_stmt->execute([$_SESSION['user_id'], $_SESSION['user_id']]);
-$all_assessments = $all_assess_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Categorise
-$active_now  = [];
-$upcoming    = [];
-$completed   = [];
-$closed      = [];
-
-foreach ($all_assessments as $a) {
-    if ($a['grade_id']) {
-        $completed[] = $a;
-        continue;
-    }
-    if ($a['is_active'] == 0) { $closed[] = $a; continue; }
-    if (!empty($a['scheduled_date'])) {
-        $sch = strtotime($a['scheduled_date']);
-        $end = $sch + ($a['timer_minutes'] * 60) + 60;
-        if ($sch > time())      { $upcoming[]   = $a; }
-        elseif (time() > $end)  { $closed[]     = $a; }
-        else                    { $active_now[]  = $a; }
-    } else {
-        $active_now[] = $a; // no date = open
-    }
-}
-
-// Stats
-$total_courses    = count($courses);
-$total_completed  = count($completed);
-$total_active     = count($active_now);
-$total_upcoming   = count($upcoming);
-?>
 
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark tsu-topbar mb-0">
