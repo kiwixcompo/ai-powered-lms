@@ -72,7 +72,7 @@ if (!$module) die("Module not found.");
                         <div class="alert alert-success">
                             This module is currently in PDF Mode. Students will see the uploaded PDF instead of the Markdown text.
                             <br><br>
-                            <a href="' . BASE_URL . '/uploads/pdfs/<?= htmlspecialchars($module['pdf_path']) ?>" target="_blank" class="btn btn-sm btn-outline-dark">View Current PDF</a>
+                            <a href="<?= BASE_URL ?>/uploads/pdfs/<?= htmlspecialchars($module['pdf_path']) ?>" target="_blank" class="btn btn-sm btn-outline-dark">View Current PDF</a>
                         </div>
                     <?php else: ?>
                         <div class="alert alert-info">
