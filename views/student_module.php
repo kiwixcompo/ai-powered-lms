@@ -62,13 +62,54 @@ foreach ($all_assessments as $a) {
     }
 }
 
-// Parse Markdown content — load Parsedown directly to bypass autoloader issues on live server
-require_once __DIR__ . '/../vendor/autoload.php';
-if (!class_exists('Parsedown')) {
-    require_once __DIR__ . '/../vendor/erusev/parsedown/Parsedown.php';
+// Inline Markdown-to-HTML converter — no external dependencies needed
+function markdownToHtml(string $text): string {
+    $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    // Headings
+    $text = preg_replace('/^######\s+(.+)$/m', '<h6>$1</h6>', $text);
+    $text = preg_replace('/^#####\s+(.+)$/m',  '<h5>$1</h5>', $text);
+    $text = preg_replace('/^####\s+(.+)$/m',   '<h4>$1</h4>', $text);
+    $text = preg_replace('/^###\s+(.+)$/m',    '<h3>$1</h3>', $text);
+    $text = preg_replace('/^##\s+(.+)$/m',     '<h2>$1</h2>', $text);
+    $text = preg_replace('/^#\s+(.+)$/m',      '<h1>$1</h1>', $text);
+    // Bold & Italic
+    $text = preg_replace('/\*\*\*(.+?)\*\*\*/', '<strong><em>$1</em></strong>', $text);
+    $text = preg_replace('/\*\*(.+?)\*\*/',     '<strong>$1</strong>', $text);
+    $text = preg_replace('/\*(.+?)\*/',         '<em>$1</em>', $text);
+    $text = preg_replace('/__(.+?)__/',         '<strong>$1</strong>', $text);
+    $text = preg_replace('/_(.+?)_/',           '<em>$1</em>', $text);
+    // Inline code
+    $text = preg_replace('/`([^`]+)`/', '<code>$1</code>', $text);
+    // Code blocks
+    $text = preg_replace('/```[\w]*\n([\s\S]*?)```/m', '<pre><code>$1</code></pre>', $text);
+    // Blockquotes
+    $text = preg_replace('/^&gt;\s+(.+)$/m', '<blockquote>$1</blockquote>', $text);
+    // Horizontal rule
+    $text = preg_replace('/^---+$/m', '<hr>', $text);
+    // Unordered lists
+    $text = preg_replace('/^\s*[\-\*]\s+(.+)$/m', '<li>$1</li>', $text);
+    $text = preg_replace('/(<li>.*<\/li>\n?)+/', '<ul>$0</ul>', $text);
+    // Ordered lists
+    $text = preg_replace('/^\s*\d+\.\s+(.+)$/m', '<li>$1</li>', $text);
+    // Links
+    $text = preg_replace('/\[(.+?)\]\((.+?)\)/', '<a href="$2" target="_blank">$1</a>', $text);
+    // Paragraphs — wrap blocks of text not already wrapped in tags
+    $text = preg_replace('/(?<!\n)\n(?!\n)/', ' ', $text);
+    $text = preg_replace('/\n{2,}/', "\n", $text);
+    $lines = explode("\n", trim($text));
+    $out = '';
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '') continue;
+        if (preg_match('/^<(h[1-6]|ul|ol|li|pre|blockquote|hr)/', $line)) {
+            $out .= $line . "\n";
+        } else {
+            $out .= "<p>$line</p>\n";
+        }
+    }
+    return $out;
 }
-$parsedown    = new Parsedown();
-$html_content = $parsedown->text($module['content'] ?? 'No content generated yet.');
+$html_content = markdownToHtml($module['content'] ?? 'No content generated yet.');
 
 $pdf_url = BASE_URL . '/uploads/pdfs/' . $module['pdf_path'];
 
