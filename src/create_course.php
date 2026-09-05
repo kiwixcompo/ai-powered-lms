@@ -3,7 +3,7 @@ session_start();
 // Force PHP to log errors to a specific file
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/error_log');
-file_put_contents(__DIR__ . '/error_log', "Session data: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+file_put_contents(__DIR__ . '/error_log', "Session data: " . print_r($_SESSION, true) . "\nCookie data: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
 
 require_once '../config/config.php';
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
