@@ -5,35 +5,24 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $db_host = $_POST['db_host'] ?? 'localhost';
-    $db_name = $_POST['db_name'] ?? '';
-    $db_user = $_POST['db_user'] ?? '';
-    $db_pass = $_POST['db_pass'] ?? '';
-    
     $admin_name = $_POST['admin_name'] ?? 'System Admin';
     $admin_email = $_POST['admin_email'] ?? 'admin@tsuniversity.ng';
     $admin_pass = password_hash($_POST['admin_pass'] ?? 'admin123', PASSWORD_DEFAULT);
 
     try {
-        // 1. Test Connection
-        $conn = new PDO("mysql:host=$db_host", $db_user, $db_pass);
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        // 2. Create Database if it doesn't exist (May require root privileges, so we catch errors)
-        $conn->exec("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
-        $conn->exec("USE `$db_name`;");
+        // Include the newly updated config file which holds the live credentials
+        require_once __DIR__ . '/config/config.php';
 
-        // 3. Import SQL Schema
+        // 1. Import SQL Schema to create tables
         $sql_file = __DIR__ . '/database_setup.sql';
         if (file_exists($sql_file)) {
             $sql = file_get_contents($sql_file);
             $conn->exec($sql);
         } else {
-            throw new Exception("database_setup.sql not found!");
+            throw new Exception("database_setup.sql not found! Cannot create tables.");
         }
 
-        // 4. Create Admin Account
-        // Check if admin exists
+        // 2. Create Admin Account
         $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$admin_email]);
         if ($stmt->rowCount() == 0) {
@@ -41,24 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insert->execute([$admin_name, $admin_email, $admin_pass]);
         }
 
-        // 5. Write to config/config.php
-        $config_content = "<?php\n"
-            . "date_default_timezone_set('Africa/Lagos');\n"
-            . "\$host = '$db_host';\n"
-            . "\$db_name = '$db_name';\n"
-            . "\$username = '$db_user';\n"
-            . "\$password = '$db_pass';\n\n"
-            . "try {\n"
-            . "    \$conn = new PDO(\"mysql:host=\$host;dbname=\$db_name\", \$username, \$password);\n"
-            . "    \$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);\n"
-            . "} catch(PDOException \$e) {\n"
-            . "    die(\"Connection failed: \" . \$e->getMessage());\n"
-            . "}\n"
-            . "?>";
-            
-        file_put_contents(__DIR__ . '/config/config.php', $config_content);
-
-        $success = "Installation Successful! You can now log in. For security, please delete install.php.";
+        $success = "Tables Created and Admin Setup Successful! You can now log in. For security, please delete install.php from your server.";
         
     } catch (PDOException $e) {
         $error = "Database Error: " . $e->getMessage();
@@ -82,40 +54,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card tsu-card shadow">
             <div class="card-header tsu-card-header text-center py-4">
                 <img src="/CMP_Course_Module/assets/images/logo.png" alt="TSU" height="60" class="mb-2">
-                <h4 class="mb-0 text-white">LMS Setup & Installation</h4>
+                <h4 class="mb-0 text-white">LMS Database & Admin Setup</h4>
             </div>
             <div class="card-body p-4">
                 <?php if ($error): ?>
-                    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                    <div class="alert alert-danger shadow-sm"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
                 <?php if ($success): ?>
-                    <div class="alert alert-success">
+                    <div class="alert alert-success shadow-sm">
                         <h5><?= htmlspecialchars($success) ?></h5>
-                        <a href="/CMP_Course_Module/login" class="btn btn-tsu-primary mt-3">Go to Login</a>
+                        <a href="/CMP_Course_Module/login" class="btn btn-tsu-primary mt-3 w-100">Go to Login Page</a>
                     </div>
                 <?php else: ?>
+                    <div class="alert alert-info">
+                        <strong>Live Database Configured!</strong><br>
+                        The application is securely connected to <code>tsuniver_tsu_lms</code>. Just set up your admin account below to generate the database tables and finish installation.
+                    </div>
                     <form method="POST">
-                        <h5 class="border-bottom pb-2 mb-3">1. Database Credentials</h5>
-                        <p class="text-muted small">Create a database and user in cPanel first, then enter the details here.</p>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Database Host</label>
-                            <input type="text" name="db_host" class="form-control" value="localhost" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Database Name</label>
-                            <input type="text" name="db_name" class="form-control" placeholder="e.g. tsuniver_lms" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Database User</label>
-                            <input type="text" name="db_user" class="form-control" placeholder="e.g. tsuniver_lmsuser" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Database Password</label>
-                            <input type="password" name="db_pass" class="form-control" required>
-                        </div>
-                        
-                        <h5 class="border-bottom pb-2 mt-4 mb-3">2. Admin Account Setup</h5>
+                        <h5 class="border-bottom pb-2 mb-3">Admin Account Setup</h5>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Admin Name</label>
                             <input type="text" name="admin_name" class="form-control" value="System Administrator" required>
@@ -129,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="password" name="admin_pass" class="form-control" required>
                         </div>
                         
-                        <button type="submit" class="btn btn-tsu-primary w-100 btn-lg">Install & Setup Database</button>
+                        <button type="submit" class="btn btn-tsu-primary w-100 btn-lg">Generate Tables & Finish Setup</button>
                     </form>
                 <?php endif; ?>
             </div>

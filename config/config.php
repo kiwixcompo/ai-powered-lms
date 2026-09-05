@@ -8,11 +8,11 @@ if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.
     $username = 'root';
     $password = '';
 } else {
-    // Production cPanel configuration (UPDATE THESE!)
+    // Production cPanel configuration (tsuniver_tsu_lms)
     $host = 'localhost';
-    $db_name = 'tsuniver_lms'; // Replace with actual live DB name
-    $username = 'tsuniver_lmsuser'; // Replace with actual live DB user
-    $password = 'YOUR_LIVE_DB_PASSWORD'; // Replace with actual live DB password
+    $db_name = 'tsuniver_tsu_lms';
+    $username = 'tsuniver_tsu_lms';
+    $password = 'FvMxSL8oP96!A-}d';
 }
 
 try {
