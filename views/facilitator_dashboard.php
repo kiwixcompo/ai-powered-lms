@@ -326,8 +326,32 @@
                                             <input type="number" name="timer_minutes" class="form-control form-control-sm" value="30" required>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label small fw-bold">Total Max Score</label>
-                                            <input type="number" name="total_score" class="form-control form-control-sm" value="100" required>
+                                            <label class="form-label small fw-bold">Marks for this Assessment</label>';
+                                            // Calculate marks already allocated for this course
+                                            $used_marks_stmt = $conn->prepare("SELECT COALESCE(SUM(total_score),0) as used FROM assessments WHERE course_id = ?");
+                                            $used_marks_stmt->execute([$c['id']]);
+                                            $used_marks = (int)$used_marks_stmt->fetchColumn();
+                                            $ca_max      = 30;
+                                            $remaining   = max(0, $ca_max - $used_marks);
+                                            $bar_pct     = min(100, round(($used_marks / $ca_max) * 100));
+                                            $bar_color   = $bar_pct >= 100 ? 'bg-danger' : ($bar_pct >= 80 ? 'bg-warning' : 'bg-success');
+                                            echo '
+                                            <div class="mb-1">
+                                                <div class="d-flex justify-content-between small text-muted">
+                                                    <span>CA Marks Used: <strong>'.$used_marks.'/'.$ca_max.'</strong></span>
+                                                    <span id="remainLbl_'.$c['id'].'" class="fw-bold '.($remaining == 0 ? 'text-danger' : 'text-success').'">'.$remaining.' remaining</span>
+                                                </div>
+                                                <div class="progress" style="height:6px">
+                                                    <div class="progress-bar '.$bar_color.'" id="markBar_'.$c['id'].'" style="width:'.$bar_pct.'%"></div>
+                                                </div>
+                                            </div>
+                                            <input type="number" name="total_score" id="totalScore_'.$c['id'].'"
+                                                   class="form-control form-control-sm"
+                                                   value="'.min(5, $remaining).'" min="1" max="'.$remaining.'"
+                                                   '.($remaining == 0 ? 'disabled' : '').' required
+                                                   data-used="'.$used_marks.'" data-max="'.$ca_max.'" data-course="'.$c['id'].'">
+                                            '.($remaining == 0 ? '<div class="text-danger small mt-1">All 30 CA marks have been allocated.</div>' : '').'
+                                            </div>
                                         </div>
                                     </div>
                                     
@@ -356,6 +380,32 @@
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Live remaining marks updater for CA mark allocator
+        document.querySelectorAll('input[id^="totalScore_"]').forEach(function(input) {
+            input.addEventListener('input', function() {
+                const used    = parseInt(this.dataset.used, 10);
+                const caMax   = parseInt(this.dataset.max, 10);
+                const cId     = this.dataset.course;
+                const entered = parseInt(this.value, 10) || 0;
+                const newUsed = used + entered;
+                const remain  = caMax - newUsed;
+                const pct     = Math.min(100, Math.round((newUsed / caMax) * 100));
+
+                const lbl = document.getElementById('remainLbl_' + cId);
+                const bar = document.getElementById('markBar_' + cId);
+                if (lbl) {
+                    lbl.textContent = remain + ' remaining';
+                    lbl.className   = 'fw-bold ' + (remain < 0 ? 'text-danger' : 'text-success');
+                }
+                if (bar) {
+                    bar.style.width = pct + '%';
+                    bar.className = 'progress-bar ' + (pct >= 100 ? 'bg-danger' : (pct >= 80 ? 'bg-warning' : 'bg-success'));
+                }
+                // Highlight input red if over limit
+                this.classList.toggle('is-invalid', remain < 0);
+            });
+        });
+
         async function generateAICourse(courseId) {
             const outline = document.getElementById('outline_' + courseId).value;
             const gradeLvl = document.getElementById('gradeLvl_' + courseId).value;

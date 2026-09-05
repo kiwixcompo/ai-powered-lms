@@ -305,7 +305,7 @@ $total_upcoming  = count($upcoming);
                     echo "<span class='badge bg-warning text-dark px-3 py-2'><i class='bi bi-lock me-1'></i>Opens {$sch}</span>";
                 } elseif ($type === 'completed') {
                     if ($a['scores_released']) {
-                        $score = number_format($a['student_score'], 1);
+                        $score = (int)round($a['student_score']);
                         $total = $a['total_score'] ?? 100;
                         $pct   = $total > 0 ? round(($a['student_score'] / $total) * 100) : 0;
                         $col   = $pct >= 50 ? '#198754' : '#dc3545';

@@ -331,7 +331,7 @@ $pdf_url = BASE_URL . '/uploads/pdfs/' . $module['pdf_path'];
                                 <small class="text-muted"><i class="bi bi-calendar-check me-1"></i><?= date('M d, Y', strtotime($ta['scheduled_date'])) ?></small>
                             </div>
                             <span class="badge bg-success fs-6 px-3 py-2">
-                                <?= number_format($ta['student_score'], 1) ?> / <?= $ta['total_marks'] ?? 100 ?>
+                                <?= (int)round($ta['student_score']) ?> / <?= $ta['total_marks'] ?? 100 ?>
                             </span>
                         </div>
                     </div>
