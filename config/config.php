@@ -1,9 +1,12 @@
 <?php
+// Enable global error logging for easier debugging
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', dirname(__DIR__) . '/error_log');
+
 date_default_timezone_set('Africa/Lagos');
 $is_localhost = ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1');
 define('BASE_URL', $is_localhost ? '/CMP_Course_Module' : '');
- // Fixes the time-lock bug for WAT / UTC+1
-
 if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1') {
     // Local WAMP configuration
     $host = 'localhost';
