@@ -15,7 +15,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $all_assess_stmt = $conn->prepare("
     SELECT a.id, a.course_id, a.title, a.timer_minutes, a.total_score, a.scheduled_date, a.is_active, a.scores_released,
            c.code as course_code, c.title as course_title,
-           g.score as student_score, g.id as grade_id
+           g.total_score_awarded as student_score, g.id as grade_id
     FROM assessments a
     JOIN courses c ON a.course_id = c.id
     JOIN enrollments e ON c.id = e.course_id
