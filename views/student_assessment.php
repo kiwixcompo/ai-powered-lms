@@ -64,7 +64,7 @@ if (empty($questions)) {
     $combined_content = "Default course material fallback.";
     if (count($modules) > 0) {
         $combined_content = "";
-        require_once 'vendor/autoload.php';
+        require_once __DIR__ . '/../vendor/autoload.php';
         $parser = new \Smalot\PdfParser\Parser();
         foreach ($modules as $m) {
             if ($m['is_pdf_mode'] && !empty($m['pdf_path'])) {

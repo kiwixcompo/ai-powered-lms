@@ -53,7 +53,7 @@ foreach ($assessments as $a) {
 }
 
 // Parse Markdown content simply using parsedown (if available, else basic replacing)
-require_once 'vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 $parsedown = new Parsedown();
 $html_content = $parsedown->text($module['content'] ?? 'No content generated yet.');
 } catch (\Throwable $e) {
