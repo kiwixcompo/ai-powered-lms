@@ -62,9 +62,12 @@ foreach ($all_assessments as $a) {
     }
 }
 
-// Parse Markdown content
+// Parse Markdown content — load Parsedown directly to bypass autoloader issues on live server
 require_once __DIR__ . '/../vendor/autoload.php';
-$parsedown = new Parsedown();
+if (!class_exists('Parsedown')) {
+    require_once __DIR__ . '/../vendor/erusev/parsedown/Parsedown.php';
+}
+$parsedown    = new Parsedown();
 $html_content = $parsedown->text($module['content'] ?? 'No content generated yet.');
 
 $pdf_url = BASE_URL . '/uploads/pdfs/' . $module['pdf_path'];
