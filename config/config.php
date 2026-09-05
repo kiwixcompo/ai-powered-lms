@@ -16,9 +16,9 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 date_default_timezone_set('Africa/Lagos');
-$is_localhost = ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1');
+$is_localhost = (php_sapi_name() === 'cli' || $_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1');
 define('BASE_URL', $is_localhost ? '/CMP_Course_Module' : '');
-if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.1') {
+if ($is_localhost) {
     // Local WAMP configuration
     $host = 'localhost';
     $db_name = 'cmp_course_module';

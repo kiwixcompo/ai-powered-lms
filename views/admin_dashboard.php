@@ -279,6 +279,32 @@
             </div>
 
         </div> <!-- End Accordion -->
+        
+        <div class="card shadow-sm mt-4 border-dark">
+            <div class="card-header bg-dark text-white">
+                <h6 class="mb-0">System AI Configuration</h6>
+            </div>
+            <div class="card-body">
+                <?php
+                    $ai_stmt = $conn->query("SELECT setting_value FROM settings WHERE setting_key = 'ai_provider'");
+                    $current_ai = $ai_stmt->fetchColumn() ?: 'puter';
+                ?>
+                <form action="<?php echo BASE_URL; ?>/src/save_ai_settings.php" method="POST">
+                    <div class="row align-items-end">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Select AI Provider for Course & Assessment Generation</label>
+                            <select name="ai_provider" class="form-select">
+                                <option value="puter" <?= $current_ai === 'puter' ? 'selected' : '' ?>>Puter AI (Requires Puter.com account - May show login popup)</option>
+                                <option value="pollinations" <?= $current_ai === 'pollinations' ? 'selected' : '' ?>>Pollinations AI (Free, No Popup, No Account Required)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">Save Configuration</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,3 +1,9 @@
+<?php 
+require_once 'config/config.php';
+// Get AI setting before sending headers
+$ai_stmt = $conn->query("SELECT setting_value FROM settings WHERE setting_key = 'ai_provider'");
+$ai_provider = $ai_stmt->fetchColumn() ?: 'puter';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,12 +11,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facilitator Dashboard</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo BASE_URL; ?>/assets/css/bootstrap.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css';">
     <!-- Custom TSU Theme -->
     <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
     <link rel="icon" href="<?php echo BASE_URL; ?>/assets/images/logo.png" type="image/png">
-    <script src="https://js.puter.com/v2/"></script>
     
+    <?php if ($ai_provider === 'puter'): ?>
+    <script src="https://js.puter.com/v2/"></script>
+    <?php endif; ?>
+    
+    <script>
+        const AI_PROVIDER = '<?php echo $ai_provider; ?>';
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark tsu-navbar mb-4">
@@ -440,12 +452,20 @@
                 Ensure you use Markdown. For images, just put markdown placeholders like ![Image: description here].
                 Format each module explicitly starting with '## Module X: [Title]' so the system can slice it correctly.`;
 
-                // Try Puter AI
+                // Call AI
                 let responseText = "";
-                try {
+                if (AI_PROVIDER === 'pollinations') {
+                    let aiReq = await fetch('https://text.pollinations.ai/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            messages: [{ role: 'user', content: prompt }]
+                        })
+                    });
+                    if (!aiReq.ok) throw new Error("Pollinations API returned error " + aiReq.status);
+                    responseText = await aiReq.text();
+                } else {
                     responseText = await puter.ai.chat(prompt);
-                } catch(e) {
-                    throw e; // Pass to fallback
                 }
                 
                 document.getElementById('mdContent_' + courseId).value = responseText;
@@ -526,9 +546,23 @@ ${courseText}
 
 OUTPUT STRICTLY JSON ONLY. No markdown blocks, no other text.`;
 
-                // 3. Call Puter AI
+                // 3. Call AI
                 btnText.innerText = 'AI Thinking...';
-                let responseText = await puter.ai.chat(prompt);
+                let responseText = "";
+                
+                if (AI_PROVIDER === 'pollinations') {
+                    let aiReq = await fetch('https://text.pollinations.ai/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            messages: [{ role: 'user', content: prompt }]
+                        })
+                    });
+                    if (!aiReq.ok) throw new Error("Pollinations API returned error " + aiReq.status);
+                    responseText = await aiReq.text();
+                } else {
+                    responseText = await puter.ai.chat(prompt);
+                }
 
                 // Clean up JSON block if AI wraps it in markdown
                 responseText = responseText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
