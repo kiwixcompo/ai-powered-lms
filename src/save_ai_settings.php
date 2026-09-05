@@ -14,7 +14,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$ai_provider, $ai_provider]);
         $_SESSION['msg'] = "AI Configuration saved successfully.";
     } catch (PDOException $e) {
-        $_SESSION['error'] = "Failed to update configuration: " . $e->getMessage();
+        // Create table on the fly if missing
+        try {
+            $conn->exec("CREATE TABLE IF NOT EXISTS settings (setting_key varchar(50) NOT NULL, setting_value varchar(255) DEFAULT NULL, PRIMARY KEY (setting_key))");
+            $stmt = $conn->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('ai_provider', ?) ON DUPLICATE KEY UPDATE setting_value = ?");
+            $stmt->execute([$ai_provider, $ai_provider]);
+            $_SESSION['msg'] = "AI Configuration saved successfully.";
+        } catch (PDOException $e2) {
+            $_SESSION['error'] = "Failed to update configuration: " . $e2->getMessage();
+        }
     }
 }
 

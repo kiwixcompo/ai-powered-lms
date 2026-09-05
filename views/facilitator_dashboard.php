@@ -1,8 +1,22 @@
 <?php 
 require_once 'config/config.php';
-// Get AI setting before sending headers
-$ai_stmt = $conn->query("SELECT setting_value FROM settings WHERE setting_key = 'ai_provider'");
-$ai_provider = $ai_stmt->fetchColumn() ?: 'puter';
+// Get AI setting safely before sending headers
+$ai_provider = 'puter';
+try {
+    $ai_stmt = $conn->query("SELECT setting_value FROM settings WHERE setting_key = 'ai_provider'");
+    if ($ai_stmt) {
+        $ai_provider = $ai_stmt->fetchColumn() ?: 'puter';
+    }
+} catch (PDOException $e) {
+    // If table doesn't exist, try to create it gracefully
+    try {
+        $conn->exec("CREATE TABLE IF NOT EXISTS settings (setting_key varchar(50) NOT NULL, setting_value varchar(255) DEFAULT NULL, PRIMARY KEY (setting_key))");
+        $conn->exec("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('ai_provider', 'pollinations')");
+        $ai_provider = 'pollinations';
+    } catch (PDOException $e2) {
+        $ai_provider = 'puter';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

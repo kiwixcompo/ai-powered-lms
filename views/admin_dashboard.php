@@ -286,8 +286,22 @@
             </div>
             <div class="card-body">
                 <?php
-                    $ai_stmt = $conn->query("SELECT setting_value FROM settings WHERE setting_key = 'ai_provider'");
-                    $current_ai = $ai_stmt->fetchColumn() ?: 'puter';
+                    $current_ai = 'puter';
+                    try {
+                        $ai_stmt = $conn->query("SELECT setting_value FROM settings WHERE setting_key = 'ai_provider'");
+                        if ($ai_stmt) {
+                            $current_ai = $ai_stmt->fetchColumn() ?: 'puter';
+                        }
+                    } catch (PDOException $e) {
+                        // Create table on the fly if it doesn't exist
+                        try {
+                            $conn->exec("CREATE TABLE IF NOT EXISTS settings (setting_key varchar(50) NOT NULL, setting_value varchar(255) DEFAULT NULL, PRIMARY KEY (setting_key))");
+                            $conn->exec("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('ai_provider', 'pollinations')");
+                            $current_ai = 'pollinations';
+                        } catch (PDOException $e2) {
+                            $current_ai = 'puter';
+                        }
+                    }
                 ?>
                 <form action="<?php echo BASE_URL; ?>/src/save_ai_settings.php" method="POST">
                     <div class="row align-items-end">
