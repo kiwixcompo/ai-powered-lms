@@ -9,6 +9,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
 $assessment_id = $_GET['assessment_id'] ?? null;
 if (!$assessment_id) die("Assessment ID missing.");
 
+// Fetch Assessment total score
+$a_stmt = $conn->prepare("SELECT total_score FROM assessments WHERE id = ?");
+$a_stmt->execute([$assessment_id]);
+$assessment_total_score = floatval($a_stmt->fetchColumn() ?: 5);
+
 // Fetch questions and student responses
 $stmt = $conn->prepare("
     SELECT q.id as question_id, q.question_text, q.question_type, q.correct_answer, q.max_score, r.answer_text 
@@ -20,6 +25,10 @@ $stmt->execute([$assessment_id, $_SESSION['user_id']]);
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (!$data) die("No responses found to grade.");
+
+// Divide total score by total number of questions to find score per question
+$total_questions = count($data);
+$score_per_question = $total_questions > 0 ? ($assessment_total_score / $total_questions) : 1.0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,14 +51,16 @@ if (!$data) die("No responses found to grade.");
 
     <script>
         const assessmentData = <?= json_encode($data) ?>;
+        const scorePerQuestion = <?= json_encode($score_per_question) ?>;
+        const assessmentTotal = <?= json_encode($assessment_total_score) ?>;
         
         async function runAutoGrader() {
             try {
-                // We perform the grading locally in the browser to eliminate fragile external AI API dependencies
                 let grades = [];
                 
                 for (let row of assessmentData) {
-                    let max = parseFloat(row.max_score);
+                    // System divides total score by total number of questions
+                    let max = scorePerQuestion;
                     let correct = String(row.correct_answer || "").toLowerCase().trim();
                     let student = String(row.answer_text || "").toLowerCase().trim();
                     

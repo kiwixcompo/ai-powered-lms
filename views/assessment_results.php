@@ -22,23 +22,31 @@ $assessment = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$assessment) die("Assessment not found or unauthorized.");
 
-// Auto-heal any legacy or unscaled grades in the database where total_score_awarded > total_score
+// Auto-heal any legacy assessment where scores were saved as raw question counts instead of scaled marks
 try {
-    $unscaled_check = $conn->prepare("
-        SELECT g.id, g.total_score_awarded, a.total_score,
-               (SELECT COUNT(*) FROM questions q WHERE q.assessment_id = a.id) as q_count
-        FROM grades g
-        JOIN assessments a ON g.assessment_id = a.id
-        WHERE g.assessment_id = ? AND g.total_score_awarded > a.total_score
+    // Check if this assessment has unscaled scores (any score > total_score)
+    $has_unscaled = $conn->prepare("
+        SELECT a.id, a.total_score,
+               (SELECT COUNT(DISTINCT q.id) FROM questions q WHERE q.assessment_id = a.id) as q_count
+        FROM assessments a
+        WHERE a.id = ? AND EXISTS (SELECT 1 FROM grades g WHERE g.assessment_id = a.id AND g.total_score_awarded > a.total_score)
     ");
-    $unscaled_check->execute([$assessment_id]);
-    $unscaled_rows = $unscaled_check->fetchAll(PDO::FETCH_ASSOC);
-    if (!empty($unscaled_rows)) {
+    $has_unscaled->execute([$assessment_id]);
+    $affected = $has_unscaled->fetch(PDO::FETCH_ASSOC);
+
+    if ($affected) {
+        $max_pts = floatval($affected['total_score']);
+        $q_cnt = intval($affected['q_count'] ?: 20);
+        
+        // Fetch all grades for this assessment
+        $all_g = $conn->prepare("SELECT id, total_score_awarded FROM grades WHERE assessment_id = ?");
+        $all_g->execute([$assessment_id]);
+        $rows = $all_g->fetchAll(PDO::FETCH_ASSOC);
+        
         $upd_stmt = $conn->prepare("UPDATE grades SET total_score_awarded = ? WHERE id = ?");
-        foreach ($unscaled_rows as $row) {
+        foreach ($rows as $row) {
             $raw = floatval($row['total_score_awarded']);
-            $max_pts = floatval($row['total_score']);
-            $q_cnt = intval($row['q_count'] ?: 20);
+            // If raw is already on scale or needs conversion, scale raw correct questions:
             $scaled = min($max_pts, max(0, round(($raw / $q_cnt) * $max_pts)));
             $upd_stmt->execute([$scaled, $row['id']]);
         }
