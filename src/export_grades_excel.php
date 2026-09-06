@@ -42,7 +42,29 @@ if (!empty($conditions)) {
     $query .= " WHERE " . implode(' AND ', $conditions);
 }
 
-$query .= " ORDER BY c.code ASC, u.name ASC, a.scheduled_date ASC";
+// Auto-heal any legacy or unscaled grades in the database where total_score_awarded > total_score
+try {
+    $unscaled_check = $conn->query("
+        SELECT g.id, g.assessment_id, g.student_id, g.total_score_awarded, a.total_score,
+               (SELECT COUNT(*) FROM questions q WHERE q.assessment_id = a.id) as q_count
+        FROM grades g
+        JOIN assessments a ON g.assessment_id = a.id
+        WHERE g.total_score_awarded > a.total_score
+    ");
+    if ($unscaled_check) {
+        $unscaled_rows = $unscaled_check->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($unscaled_rows)) {
+            $upd_stmt = $conn->prepare("UPDATE grades SET total_score_awarded = ? WHERE id = ?");
+            foreach ($unscaled_rows as $row) {
+                $raw = floatval($row['total_score_awarded']);
+                $max_pts = floatval($row['total_score']);
+                $q_cnt = intval($row['q_count'] ?: 20);
+                $scaled = min($max_pts, max(0, round(($raw / $q_cnt) * $max_pts)));
+                $upd_stmt->execute([$scaled, $row['id']]);
+            }
+        }
+    }
+} catch (Exception $e) {}
 
 $stmt = $conn->prepare($query);
 $stmt->execute($params);

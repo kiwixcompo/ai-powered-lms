@@ -53,6 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!empty($ai_questions_json)) {
             $questions = json_decode($ai_questions_json, true);
             if (is_array($questions) && count($questions) > 0) {
+                // Self-healing migration for decimal support on live server
+                try {
+                    $conn->exec("ALTER TABLE questions MODIFY COLUMN max_score DECIMAL(5,2) NOT NULL DEFAULT 1.00");
+                    $conn->exec("ALTER TABLE responses MODIFY COLUMN score_awarded DECIMAL(5,2) DEFAULT NULL");
+                } catch (Exception $e) {}
+
                 // Determine max score per question based on total marks
                 $per_question_score = round($total_score / count($questions), 2);
                 

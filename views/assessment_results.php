@@ -22,6 +22,29 @@ $assessment = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$assessment) die("Assessment not found or unauthorized.");
 
+// Auto-heal any legacy or unscaled grades in the database where total_score_awarded > total_score
+try {
+    $unscaled_check = $conn->prepare("
+        SELECT g.id, g.total_score_awarded, a.total_score,
+               (SELECT COUNT(*) FROM questions q WHERE q.assessment_id = a.id) as q_count
+        FROM grades g
+        JOIN assessments a ON g.assessment_id = a.id
+        WHERE g.assessment_id = ? AND g.total_score_awarded > a.total_score
+    ");
+    $unscaled_check->execute([$assessment_id]);
+    $unscaled_rows = $unscaled_check->fetchAll(PDO::FETCH_ASSOC);
+    if (!empty($unscaled_rows)) {
+        $upd_stmt = $conn->prepare("UPDATE grades SET total_score_awarded = ? WHERE id = ?");
+        foreach ($unscaled_rows as $row) {
+            $raw = floatval($row['total_score_awarded']);
+            $max_pts = floatval($row['total_score']);
+            $q_cnt = intval($row['q_count'] ?: 20);
+            $scaled = min($max_pts, max(0, round(($raw / $q_cnt) * $max_pts)));
+            $upd_stmt->execute([$scaled, $row['id']]);
+        }
+    }
+} catch (Exception $e) {}
+
 // Fetch Students who completed it
 $q_stmt = $conn->prepare("
     SELECT u.name, u.reg_no, g.total_score_awarded, g.graded_at 

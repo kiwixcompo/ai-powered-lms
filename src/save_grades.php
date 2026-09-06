@@ -38,6 +38,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $conn->beginTransaction();
 
+            // Self-healing migration for decimal support
+            try {
+                $conn->exec("ALTER TABLE questions MODIFY COLUMN max_score DECIMAL(5,2) NOT NULL DEFAULT 1.00");
+                $conn->exec("ALTER TABLE responses MODIFY COLUMN score_awarded DECIMAL(5,2) DEFAULT NULL");
+            } catch (Exception $e) {}
+
             $total_awarded = 0;
             $update_resp = $conn->prepare("UPDATE responses SET score_awarded = ? WHERE assessment_id = ? AND student_id = ? AND question_id = ?");
 
@@ -49,8 +55,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $update_resp->execute([$score, $assessment_id, $student_id, $q_id]);
             }
 
-            // The user requested: "if it's a decimal number, the system is expected to provide a round figure as the score."
-            $rounded_total = round($total_awarded);
+            // Fetch assessment target total score
+            $a_stmt = $conn->prepare("SELECT total_score FROM assessments WHERE id = ?");
+            $a_stmt->execute([$assessment_id]);
+            $target_total_score = floatval($a_stmt->fetchColumn() ?: 5);
+
+            // Fetch maximum possible score across all questions for this assessment
+            $m_stmt = $conn->prepare("SELECT SUM(max_score) as total_max, COUNT(*) as q_count FROM questions WHERE assessment_id = ? AND (student_id = ? OR student_id IS NULL)");
+            $m_stmt->execute([$assessment_id, $student_id]);
+            $m_info = $m_stmt->fetch(PDO::FETCH_ASSOC);
+            $total_max = floatval($m_info['total_max'] ?? 0);
+            $q_count   = intval($m_info['q_count'] ?? 0);
+
+            // Proportional scaling: if questions total_max != target_total_score (e.g. 20 raw questions vs 5 marks),
+            // scale the student's score proportionally to the assessment's total marks.
+            if ($total_max > 0 && $total_max != $target_total_score) {
+                $scaled_score = ($total_awarded / $total_max) * $target_total_score;
+                $rounded_total = min($target_total_score, max(0, round($scaled_score)));
+            } elseif ($q_count > 0 && $total_awarded > $target_total_score) {
+                $scaled_score = ($total_awarded / $q_count) * $target_total_score;
+                $rounded_total = min($target_total_score, max(0, round($scaled_score)));
+            } else {
+                $rounded_total = min($target_total_score, max(0, round($total_awarded)));
+            }
 
             // Save final grade
             $insert_grade = $conn->prepare("INSERT INTO grades (assessment_id, student_id, total_score_awarded) VALUES (?, ?, ?)");
